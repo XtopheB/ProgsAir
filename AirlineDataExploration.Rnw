@@ -1,0 +1,150 @@
+% Sweave file creating statistics and graphs on the merged database
+% Created (CB) 156/10/2012
+
+\documentclass[a4paper]{article}
+
+\title{An exploration of THE Airlines database}
+\author{Christophe }
+
+\usepackage{Sweave, setspace,graphicx,srcltx,enumitem,harvard, subfig}
+\usepackage{setspace, relsize}   % <-- for package LaTex in Hmisc to work
+\usepackage{rotating}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+%\SweaveOpts{concordance=TRUE}
+
+
+
+% Quelques Options de depart pour mettre les graphiques dans un sous repertoire
+% et leur donner le nom Graph-001
+
+\SweaveOpts{prefix.string=Graphics/GraphR, eps = FALSE, pdf = TRUE}  
+%\SweaveOpts{width=5, height=3.5}
+
+% Et pour laisser l affichage des commentaires du programmes
+\SweaveOpts{keep.source=TRUE}
+
+
+
+% <<results=hide>>=               % <--- si l'on souhaite ne pas afficher les risultats...
+% <<echo=false,results=hide>>=    % <--- si l'on ne souhaite ni code, ni risultats... 
+
+
+<<echo=FALSE, results=hide>>=
+
+## Novembre 2011-Aout 2012  
+
+## D abord on efface tout silencieusement...
+
+rm(list=ls())
+
+## Second change the working directory
+
+setwd("D:/progs/Air/progs")   
+#setwd("C:/Chris/zprogs/Air/progs")   
+
+
+
+library(Benchmarking)
+library(foreign)
+library(np)
+library(Hmisc)  #  <- Misc. statistiques descriptives  
+
+#library(psych)  #  <- statistiques descriptives pour psychologues
+#library(pastecs) #  <- statistiques descrioptives pour Space-Time Ecological Series
+
+#--------------------------------------------------
+## Partie I: Reading the data (All years) 
+
+fichier ="merge4.csv"
+dataall <- read.csv(paste("../Sources/",fichier, sep=""), sep=";")  
+dim(dataall)
+Mydata <- data.frame(dataall)
+attach(Mydata)
+
+@
+
+% ------------Debut du papier -------------
+\maketitle
+%\tableofcontents
+%\newpage
+
+We are looking at the file \textbf{\Sexpr{fichier}},  we have \textbf{\Sexpr{nrow(dataall)}} observations and \textbf{\Sexpr{ncol(dataall)}} variables over \Sexpr{length(unique(Mydata$year))} years. We found \textbf{\Sexpr{length(unique(Mydata$carrier))}} different carriers in the database. Below is a partial overview of the file.
+\bigskip 
+
+<<echo=false, results=tex>>=
+#pastecs::stat.desc(dataall)   # library pastecs
+# describe(Mydata) #  (library (psych and  Hmisc))
+
+foo <- Hmisc::describe(Mydata)    
+latex(c(foo[3:4], foo["year"], foo[50:55]), file='')
+@
+
+Un petit graphique pour faire passer....
+
+<<echo=FALSE,  fig=TRUE >>=
+
+Noms<-levels(Mydata$carrier)
+Sub<-subset(Mydata, select = c(RPKTotal, RTKTotal, RPKTotalDom))
+stars(Sub[1:27,], len = 0.8, key.loc = c(12, 1.5), main = "Airlines RPK-RTK typology", draw.segments = TRUE, labels=Noms[1:27])
+@
+
+\newpage
+
+<<echo=FALSE,  fig=TRUE >>=
+#bpplot(split(RPKTotal, year))
+boxplot(split(RPKTotal, year), outline=FALSE, notch=TRUE, col="bisque")
+title("RPKTotal distribution over years ")
+
+#bpplot(RPKTotal)
+@
+
+\newpage
+
+<<echo=FALSE, results=hide, fig=FALSE >>=
+summary(subset(Mydata, year=2010, select =c(RPKTotal, RTKTotal)))
+str(Mydata)
+plot(year,RPKTotal, type="b")
+
+#detach(Mydata)
+@
+<<echo=FALSE,  fig=TRUE >>=
+# Create Line Chart
+MySubdata <-subset(Mydata, country_code > 749)   ### SUBSET !!
+MySubdata <-subset(Mydata, country_code ==427)   ### SUBSET FRANCE!
+
+
+nc <- length(unique(MySubdata$carrier))
+Car <-unique(MySubdata$carrier)
+
+# get the range for the x and y axis 
+xrange <- range(MySubdata$year)
+yrange <- range(MySubdata$RPKTotal, finite=TRUE) 
+
+# set up the plot 
+plot(xrange, yrange, type="n", xlab="Years",
+     ylab="RPKTotal" ) 
+colors <- rainbow(nc) 
+linetype <- c(1:nc) 
+plotchar <- seq(18,18+nc,1)
+
+# add lines 
+for (i in 1:nc) { 
+    foo <- subset(MySubdata, carrier== Car[i])  
+    lines(foo$year, foo$RPKTotal, type="b", lwd=1.5,
+    lty=linetype[i], col=colors[i]) 
+    text(x=(max(foo$year,na.rm=TRUE)-1), y=max(foo$RPKTotal,na.rm=TRUE ), pos=4, labels=Car[i],col="red" )#col=colors[i])
+} 
+
+# add a title and subtitle 
+title("Airlines", sub=paste("We have ",nc," disitinct carriers on this sample"))
+
+# add a legend 
+#legend(xrange[1], yrange[2], Car[1:nc], cex=0.8, col=colors,
+# 	 pch=plotchar, lty=linetype, title="Carriers", horiz=FALSE)
+
+@
+
+
+\end{document}
+
