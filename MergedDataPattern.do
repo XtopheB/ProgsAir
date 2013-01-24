@@ -1,6 +1,7 @@
 /* 23/12/2012 	:  Importation des données et pré-traitement  */
 /*				: remplacement des missings, des ", " etc..*/
 /* 23/01/2013 	: Visualisation des missing par variable et par an   */
+/* 24/01/2013	: Definition of variables Y, K, L, E,  M (to discuss)     */
 
 
 /* Remove everything  */
@@ -42,6 +43,29 @@ foreach v of local Allvar{
 egen Id=group(carrier)   /* Generates a unique identifier for each carrier  */
 order Id carrier* year 
 
+/* On peut incorporer des zones géographiques en utilsant le code pays */
+gen Region = 0
+forvalues i=1/9 {
+	local j=`i'*100	
+	replace Region = `i' if country_code >=`i'00 & country_code <= `i'99
+ }
+ 
+replace Region = 0 if country_code == 900 /* We put canada with USA  */   
+label define typoRegion 0 "North America", modify
+label define typoRegion 1 "South America", modify
+label define typoRegion 2 "Central America", modify
+label define typoRegion 3 "South America 2", modify
+label define typoRegion 4 "Europe", modify
+label define typoRegion 5 "Africa", modify
+label define typoRegion 6 "Arabia", modify
+label define typoRegion 7 "Asia", modify
+label define typoRegion 8 "Malaysia", modify 
+*label define typoRegion 9 "Canada", modify 
+
+label value Region typoRegion
+
+/* Mise en forme données logitudinales  */
+
 xtset  Id year
 xtdescribe, patterns(50)
 
@@ -66,32 +90,60 @@ local Outvar " or_total or_othertot rpktotal rtktotal rpktotaldom rpktotalint rt
 /* Liste de toutes les variables pertinentes */
 local KLEMYvar  "`Kvar' `Lvar' `Evar' `Mvar' `Outvar'"
 
-/* Tentative de visualisation des missiings */
+
+des `KLEMYvar', full
+
+/* Tentative de visualisation des missings */
 	
 misstable  summarize  `KLEMYvar' 
 
 /* Création d'une matrice qui contient les % de non nul par variable et par an */
 
 local n : word count `KLEMYvar'
-matrix nonnul = J( `n',16, 0)
+matrix nonnul = J( `n',15, 0)
 mat rowname nonnul = `KLEMYvar'
-mat colname nonnul = 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010
+mat colname nonnul = 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009
 
 local i=1
 foreach v of local KLEMYvar{
 	 local j= 1
-	forvalues y = 1995/2010{
-		quietly distinct carrier if year == `y'
+	forvalues y = 1995/2009{
+		quietly distinct carrier  if year == `y' 
 		local nbcar =`r(N)'
 		quietly count if `v'!=. & year == `y'
-		mat nonnul[`i' , `j']= round(`r(N)'*100/`nbcar', 2)
+		*mat nonnul[`i' , `j']= round(`r(N)'*100/`nbcar', 4)  /* <<< a voir si on veut des % ?  */
+		mat nonnul[`i' , `j']= `r(N)'  						/* Nbs ?  */
 		local j= `j' +1
 	}
 	local i= `i'+1
 }
 mat list nonnul
-order Id carrier* year `KLEMYvar'
+outtable using Graphics/table1, mat(nonnul)
+
+/* =========================== CHOIX DES VARIABLES  ===================*/ 
+gen Y = rpktotal
+gen K = mtowkg
+gen L = totalpersonnelendyearpersonnel
+gen E = fuelquantity
+gen M = 1			/* <<<--------- A changer ici   */
+gen YsurK = Y/K if K != 0
+gen YsurL = Y/L if L != 0
+gen YsurE = Y/E if E != 0
+gen YsurM = Y/M if M != 0
+
+
+
+/* Mise en ordre des données et exportation */
+
+order Id carrier* year Y K L E M `KLEMYvar' country* Region
 sort carrier year
+preserve
+keep Id carrier*  year Y* K L E M  country* Region
+keep if year !=2010
+save   ../data/AllyearsKLEM.dta, replace
+restore
+
+
 
 
 /*Visualisation between - within par variable   */
