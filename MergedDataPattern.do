@@ -68,6 +68,7 @@ label value Region typoRegion
 
 xtset  Id year
 xtdescribe, patterns(50)
+gen M = 1 /* provisoire */
 
 /*********************************************	*/
 /* variables of interest 						*/
@@ -82,7 +83,7 @@ local Lvar "totalpersonnelendyearpersonnel pilotsandcopilotstotalexpenditur tota
 local Evar "fuelexp fuelprice fuelquantity"
 
 /* - Material                                    */
-local Mvar ""
+local Mvar "M"
 
 /* - Output                                    */
 local Outvar " or_total or_othertot rpktotal rtktotal rpktotaldom rpktotalint rtktotaldom rtktotalint tkpaxtotal"
@@ -118,31 +119,48 @@ foreach v of local KLEMYvar{
 	local i= `i'+1
 }
 mat list nonnul
-outtable using Graphics/table1, mat(nonnul)
+outtable using Graphics/table2, mat(nonnul) replace
 
 /* =========================== CHOIX DES VARIABLES  ===================*/ 
 gen Y = rpktotal
 gen K = mtowkg
 gen L = totalpersonnelendyearpersonnel
 gen E = fuelquantity
-gen M = 1			/* <<<--------- A changer ici   */
+*gen M = 1			/* <<<--------- A changer ici   */
 gen YsurK = Y/K if K != 0
 gen YsurL = Y/L if L != 0
 gen YsurE = Y/E if E != 0
 gen YsurM = Y/M if M != 0
 
+/* TEST de la base : */
+gen Test0 =Y*K*L*E*M
+bysort year : count if  Test0 >0 & Test0!=.
+
+gen YK= Y*K
+bysort year : count if YK >0 & YK!=.
+
+gen YKL = YK*L
+bysort year : count if YKL >0 & YKL!=.
+
+gen YE= Y*E
+bysort year : count if YE >0 & YE!=.
+
+gen EL=E*L
+bysort year : count if EL >0 & EL!=.
+
+bysort year : list carriername if Test0 >0 & Test0!=.
+edit Id carriername year if test0 >0 & test0 !=.
 
 
 /* Mise en ordre des données et exportation */
 
-order Id carrier* year Y K L E M `KLEMYvar' country* Region
+order Id carrier* year Y K L E M `KLEMYvar' country* Region Test0
 sort carrier year
 preserve
-keep Id carrier*  year Y* K L E M  country* Region
+keep Id carrier*  year Y* K L E M  country* Region  Test0
 keep if year !=2010
 save   ../data/AllyearsKLEM.dta, replace
 restore
-
 
 
 

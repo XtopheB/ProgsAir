@@ -1,5 +1,8 @@
 % Sweave file creating statistics and graphs on the merged database
 % Created (CB) 156/10/2012
+% 24/01/2013 :  Modification using Stata file created by MergePattern.do  
+% 3/02/2013 : Integration of various statistics for 2 reference years. 
+%           : We decide to work with data for which Y, K, L & M are available i.e. test0>0 
 
 \documentclass[a4paper]{article}
 
@@ -11,6 +14,7 @@
 \usepackage{rotating}
 \begin{document}
 \SweaveOpts{concordance=TRUE}
+
 %\SweaveOpts{concordance=TRUE}
 
 
@@ -24,43 +28,51 @@
 % Et pour laisser l affichage des commentaires du programmes
 \SweaveOpts{keep.source=TRUE}
 
-
-
 % <<results=hide>>=               % <--- si l'on souhaite ne pas afficher les risultats...
 % <<echo=false,results=hide>>=    % <--- si l'on ne souhaite ni code, ni risultats... 
 
-
 <<echo=FALSE, results=hide>>=
 
-## Novembre 2011-Aout 2012  
-
 ## D abord on efface tout silencieusement...
-
 rm(list=ls())
 
 ## Second change the working directory
 
-setwd("D:/progs/Air/progs")   
-#setwd("C:/Chris/zprogs/Air/progs")   
-
-
+#setwd("D:/progs/Air/progs")   
+setwd("C:/Chris/zprogs/Air/progs")   
 
 library(Benchmarking)
 library(foreign)
 library(np)
 library(Hmisc)  #  <- Misc. statistiques descriptives  
+library(ineq)  # pour les inganil??s (HHI,..)
+library(reporttools)  # pour les tables
 
 #library(psych)  #  <- statistiques descriptives pour psychologues
 #library(pastecs) #  <- statistiques descrioptives pour Space-Time Ecological Series
-
 #--------------------------------------------------
 ## Partie I: Reading the data (All years) 
 
-fichier ="merge4.csv"
-dataall <- read.csv(paste("../Sources/",fichier, sep=""), sep=";")  
+fichier ="AllyearsKLEM.dta"
+
+dataall <- read.dta(paste("../data/",fichier, sep=""))  
 dim(dataall)
 Mydata <- data.frame(dataall)
-attach(Mydata)
+
+# New unit for Y, K, E 
+Mydata$Y <- Mydata$Y/1000
+Mydata$K <- Mydata$K/1000
+Mydata$E <- Mydata$E/1000
+
+### SUBSET of "BIG AIRLINES" !!
+MyBigdata <-subset(Mydata, Y> quantile(Y, .75, na.rm = TRUE)  & Test0 > 0) 
+
+Workdata <-subset(Mydata, Test0 > 0)
+
+attach(Workdata)
+# Definition de la p??riode d'??tude
+annee1=2002
+annee2=2008
 
 @
 
@@ -69,81 +81,243 @@ attach(Mydata)
 %\tableofcontents
 %\newpage
 
-We are looking at the file \textbf{\Sexpr{fichier}},  we have \textbf{\Sexpr{nrow(dataall)}} observations and \textbf{\Sexpr{ncol(dataall)}} variables over \Sexpr{length(unique(Mydata$year))} years. We found \textbf{\Sexpr{length(unique(Mydata$carrier))}} different carriers in the database. Below is a partial overview of the file.
+We are looking at the file \textbf{\Sexpr{fichier}},  we have \textbf{\Sexpr{nrow(dataall)}} observations and \textbf{\Sexpr{ncol(dataall)}} variables over \Sexpr{length(unique(Mydata$year))} years. We found \textbf{\Sexpr{length(unique(Mydata$carrier))}} different carriers in the database.\\
+
+We should emphasize that only \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0, select= c(carrier))))}} carriers have non null production variables (i.e. Y, K, L E \& M not null)  at least one year.  In 2008, this number is of \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0 & year == 2008, select= c(carrier))))}} carriers. Below is a partial overview of the file's main variables for those \textbf{fully} observable airlines.
+
+
 \bigskip 
 
+<<echo=false,results=tex>>=
+# Cr??ation de la table
+annee <-annee1
+# definition de l'??chantillon
+Tempdata <-subset(Workdata, year== annee)
+
+#nrow(unique(subset(Mydata, Test0 >0 & year == 2008, select= c(carrier))))}}
+
+Mycap <- paste("Summary of production variables (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"unique airlines")
+
+Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
+Mylab <- "Monlabel"
+Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
+                                      "Y" = Tempdata$Y,
+                                      "K" = Tempdata$K,
+                                      "L" = Tempdata$L,
+                                      "E" = Tempdata$E,
+                                      "M" = Tempdata$M
+                                  )                                                                                                                 )
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+<<echo=false,results=tex>>=
+# Cr??ation de la table
+annee <-annee2
+# definition de l'??chantillon
+Tempdata <-subset(Workdata, year== annee)
+
+#nrow(unique(subset(Mydata, Test0 >0 & year == 2008, select= c(carrier))))}}
+
+Mycap <- paste("Summary of production variables (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"unique airlines")
+
+Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
+Mylab <- "Monlabel"
+Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
+                                      "Y" = Tempdata$Y,
+                                      "K" = Tempdata$K,
+                                      "L" = Tempdata$L,
+                                      "E" = Tempdata$E,
+                                      "M" = Tempdata$M
+                                  )                                                                                                                 )
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+
+
 <<echo=false, results=tex>>=
+# not run 
 #pastecs::stat.desc(dataall)   # library pastecs
 # describe(Mydata) #  (library (psych and  Hmisc))
 
-foo <- Hmisc::describe(Mydata)    
-latex(c(foo[3:4], foo["year"], foo[50:55]), file='')
+#foo <- Hmisc::describe(subset(Mydata, Test0 > 0)) 
+#foo <- Hmisc::describe(Mydata)   
+#latex(c(foo[5:9], foo["year"]), file='')
 @
 
-Un petit graphique pour faire passer....
 
-<<echo=FALSE,  fig=TRUE >>=
+A graph on the output (Y) of the industry's main carrier (3rd quantile i.e. \Sexpr{length(unique(MyBigdata$carrier))} airlines) over time:\footnote{The carrier under scrutiny on this sample are \Sexpr{list((unique(MyBigdata$carriername)))}}
 
-Noms<-levels(Mydata$carrier)
-Sub<-subset(Mydata, select = c(RPKTotal, RTKTotal, RPKTotalDom))
-stars(Sub[1:27,], len = 0.8, key.loc = c(12, 1.5), main = "Airlines RPK-RTK typology", draw.segments = TRUE, labels=Noms[1:27])
-@
-
-\newpage
-
-<<echo=FALSE,  fig=TRUE >>=
-#bpplot(split(RPKTotal, year))
-boxplot(split(RPKTotal, year), outline=FALSE, notch=TRUE, col="bisque")
-title("RPKTotal distribution over years ")
-
-#bpplot(RPKTotal)
-@
-
-\newpage
-
-<<echo=FALSE, results=hide, fig=FALSE >>=
-summary(subset(Mydata, year=2010, select =c(RPKTotal, RTKTotal)))
-str(Mydata)
-plot(year,RPKTotal, type="b")
-
-#detach(Mydata)
-@
 <<echo=FALSE,  fig=TRUE >>=
 # Create Line Chart
-MySubdata <-subset(Mydata, country_code > 749)   ### SUBSET !!
-MySubdata <-subset(Mydata, country_code ==427)   ### SUBSET FRANCE!
-
-
-nc <- length(unique(MySubdata$carrier))
-Car <-unique(MySubdata$carrier)
+nc <- length(unique(MyBigdata$carrier))
+Car <-unique(MyBigdata$carrier)
 
 # get the range for the x and y axis 
-xrange <- range(MySubdata$year)
-yrange <- range(MySubdata$RPKTotal, finite=TRUE) 
+xrange <- range(MyBigdata$year)
+yrange <- range(MyBigdata$Y, finite=TRUE) 
 
 # set up the plot 
 plot(xrange, yrange, type="n", xlab="Years",
-     ylab="RPKTotal" ) 
+     ylab="Y" ) 
 colors <- rainbow(nc) 
 linetype <- c(1:nc) 
 plotchar <- seq(18,18+nc,1)
 
 # add lines 
 for (i in 1:nc) { 
-    foo <- subset(MySubdata, carrier== Car[i])  
-    lines(foo$year, foo$RPKTotal, type="b", lwd=1.5,
+    foo <- subset(MyBigdata, carrier== Car[i])  
+    lines(foo$year, foo$Y, type="b", lwd=1.5,
     lty=linetype[i], col=colors[i]) 
-    text(x=(max(foo$year,na.rm=TRUE)-1), y=max(foo$RPKTotal,na.rm=TRUE ), pos=4, labels=Car[i],col="red" )#col=colors[i])
+    text(x=(max(foo$year,na.rm=TRUE)-1), y=max(foo$Y,na.rm=TRUE ), pos=4, labels=Car[i],col="red" )#col=colors[i])
 } 
 
 # add a title and subtitle 
-title("Airlines", sub=paste("We have ",nc," disitinct carriers on this sample"))
+title("Big Airlines Output (Y) over years", sub=paste("We have ",nc," disitinct carriers on this sample"))
 
 # add a legend 
 #legend(xrange[1], yrange[2], Car[1:nc], cex=0.8, col=colors,
-# 	 pch=plotchar, lty=linetype, title="Carriers", horiz=FALSE)
+#    pch=plotchar, lty=linetype, title="Carriers", horiz=FALSE)
 
 @
+
+<<echo=FALSE,  fig=TRUE >>=
+#bpplot(split(RPKTotal, year))
+boxplot(split(Workdata$Y, year), outline=FALSE, notch=TRUE, col="bisque")
+title(paste("Y distribution over years, for",nrow(unique(subset(Workdata, select= c(carrier)))),"unique airlines"))
+
+#bpplot(RPKTotal)
+@
+
+
+An overview of the industry concentration on the whole sample over time.  
+
+<<fig=TRUE,echo=false>>=
+MyHHI <-function(x){
+  foo<-na.omit(x)
+  xx <- mean(x)
+  y<-conc(foo, type ="H" )*10000
+  return(y)
+}
+
+
+MyCR4 <- function(x){
+  foo <- na.omit(x)
+  xx <- sort(foo, decreasing=TRUE)
+  CR4 <- (sum(xx[1:4])/sum(xx))*100
+  return(CR4)
+}
+
+
+# Attention, l'echantillon doit avoir autant d'annees que years..
+
+years <-seq(2002, 2009)
+Sample <-subset(Mydata , year >=2002, select = c(Id,year,Y) )
+MatY <- reshape(Sample,v.names="Y", idvar= "Id", timevar="year", direction="wide")
+
+MatHHI <- apply(MatY, FUN=MyHHI,  MARGIN=2)
+MatCR4 <- apply(MatY, FUN=MyCR4,  MARGIN=2)
+
+plot(years, MatHHI[2:9], type="o" ,lty=1,  col="darkred" )
+axis(2, pretty(c(0, 1.1*max(MatHHI[2:9])),min.n=6, n=10), col='darkred')
+
+par(new=T) 
+plot(years, MatCR4[2:9], type="o" , lty=2,  col="blue" , axes=F)
+axis(4, xaxp=c(0,  10, 1.2*max(MatCR4[2:9])), col='blue')
+legend("topleft",legend=c("Herfindahl index (left scale)", "CR4 index (right scale)"),lty=1:2,col=c("darkred", "blue"))
+
+@
+
+
+\newpage
+<<echo=FALSE, results=hide>>=
+
+Mydata.y1 <- subset(Mydata,year==annee1 & Test0 >0)
+Mydata.y2 <- subset(Mydata,year==annee2 & Test0 >0)
+
+foo.y1 <- ineq(Mydata.y1$Y,type="Gini")
+foo.y2 <- ineq(Mydata.y2$Y,type="Gini")
+
+@
+
+
+The Gini index equals \textbf{\Sexpr{round(foo.y1, 3)}} in \Sexpr{annee1} and \textbf{\Sexpr{round(foo.y2,3)}} in \Sexpr{annee2}. The Lorentz curves below show the distribution of output over the the industry for these years.\footnote{It shows for any \% of firms (x axis), what percentage  (y axis) of the total output they produce.}
+
+<<fig=TRUE,echo=false>>=
+
+Lorentz.y1 <- Lc(Mydata.y1$Y)
+Lorentz.y2 <- Lc(Mydata.y2$Y)
+plot(Lorentz.y1,col="darkred", lty = 1, lwd=4)
+lines(Lorentz.y2, col="blue", lty = 2, lw=2)
+legend("topleft",legend=c(paste("Prod. en",annee1), paste("Prod. en",annee2)),lty=1:2,col=c("darkred", "blue"))
+
+@
+
+\section{productivity}
+
+<<echo=false,results=tex>>=
+
+# definition de variables
+Workdata$YoverK <- Workdata$Y / Workdata$K
+Workdata$YoverL <- Workdata$Y / Workdata$L
+Workdata$YoverE <- Workdata$Y / Workdata$E
+Workdata$YoverM <- Workdata$Y / Workdata$M
+
+# Cr??ation de la table
+annee <-annee1
+# definition de l'??chantillon
+Tempdata <-subset(Workdata, year== annee)
+
+#nrow(unique(subset(Mydata, Test0 >0 & year == 2008, select= c(carrier))))}}
+
+Mycap <- paste("Summary of partial productivity (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"unique airlines")
+Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
+Mylab <- "Monlabel"
+Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
+                                      "Y over K" = Tempdata$YoverK,
+                                      "Y over L" = Tempdata$YoverL,
+                                      "Y over E" = Tempdata$YoverE,
+                                      "Y over M" = Tempdata$YoverM
+                                  )                                                                                                                 )
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+
+<<echo=false,results=tex>>=
+annee = annee2
+Tempdata <-subset(Workdata, year== annee)
+
+Mycap <- paste("Summary of partial productivity (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"unique airlines")
+Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
+Mylab <- "Monlabel"
+Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
+                                      "Y over K" = Tempdata$YoverK,
+                                      "Y over L" = Tempdata$YoverL,
+                                      "Y over E" = Tempdata$YoverE,
+                                      "Y over M" = Tempdata$YoverM
+                                  )                                                                                                                 )
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+
+
+
+\newpage
+Essais en tous genres...
+
+<<echo=FALSE,  fig=TRUE >>=
+
+Noms<-unique(Mydata$carriername)
+Sub<-subset(Mydata, year==2008 & Y >0 & Region == 1 , select = c(Y, K, L, E))
+
+stars(Sub[1:10,], len = 0.8, key.loc = c(1, 1.5), main = "Airlines Y-K-L typology", draw.segments = TRUE, labels=Noms[1:4])
+## Attention noms faux !!
+
+@
+
+% Pas utilis??...
+<<echo=FALSE, results=hide, fig=FALSE >>=
+summary(subset(Mydata, year=annee2, select =c(Y, L)))
+str(Mydata)
+plot(year,Y, type="b")
+#detach(Mydata)
+@
+
 
 
 \end{document}
