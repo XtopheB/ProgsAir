@@ -53,6 +53,7 @@ library(Benchmarking)
 library(frontiles)
 library(FEAR)
 library(xtable)
+library(calibrate)  # for labelling points (textxy)
 
 #library(psych)  #  <- statistiques descriptives pour psychologues
 #library(pastecs) #  <- statistiques descrioptives pour Space-Time Ecological Series
@@ -79,6 +80,12 @@ attach(Workdata)
 # Definition de la p??riode d'??tude
 annee1=2002
 annee2=2008
+
+# Param??tres 
+M.order<-100
+M.rep <-200
+alpha <- 0.975
+
 
 @
 
@@ -305,9 +312,50 @@ tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab
 
 \subsection{DEA, m-frontiers \& $ \alpha$-frontier in \Sexpr{annee1} and \Sexpr{annee2}}
 
+We compute below the $\alpha$-frontier with only one input ($E$, here) and one output and graph it for \Sexpr{annee1} and \Sexpr{annee2}. As soon as we have and aggregate input index, we'll replace it here...
+
+<<fig=TRUE,echo=FALSE>>=
+annee <-annee1
+dataref.y <- subset(Workdata,year==annee )
+#dataref.y <- Workdata   # si on vet tout ensemble
+
+
+plot(dataref.y$E,dataref.y$Y,  pch="+", col="darkblue",
+     main=paste(" alpha-frontier in", annee, ", alpha=",alpha,"") )
+textxy(dataref.y$E,dataref.y$Y, dataref.y$carrier)
+
+dea.plot.frontier(dataref.y$E, dataref.y$Y, RTS="vrs", add= TRUE, lty="dashed", col="blue", lwd=1)
+rug(dataref.y$E, col = "grey")
+
+alphafrontier.2d(as.matrix(dataref.y$E),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = TRUE, shade=TRUE)
+
+
+legend("topleft",legend=c("Points", "DEA VRS","alpha-frontier", "confidence bound"),lty=2:4,col=c( "darkblue", "blue","green", "grey"))
+@
+
+
+<<fig=TRUE,echo=FALSE>>=
+annee <-annee2
+dataref.y <- subset(Workdata,year==annee )
+#dataref.y <- Workdata
+
+plot(dataref.y$E,dataref.y$Y,  pch="+", col="darkblue", main=paste(" alpha-frontier in", annee, ", alpha=",alpha,"") )
+textxy(dataref.y$E,dataref.y$Y, dataref.y$carrier)
+
+dea.plot.frontier(dataref.y$E, dataref.y$Y, RTS="vrs", add= TRUE, lty="dashed", col="blue", lwd=1)
+rug(dataref.y$E, col = "grey")
+
+alphafrontier.2d(as.matrix(dataref.y$E),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = TRUE, shade=TRUE)
+
+
+legend("topleft",legend=c("Points", "DEA VRS","alpha-frontier", "confidence bound"),lty=2:4,col=c( "darkblue", "blue","green", "grey"))
+@
+
+
+
 <<echo=false,results=tex>>=
 annee =annee1
-# Calcul des efficacitis avec DEA, m-frontihres et alpha-frontieres 
+# Calcul des efficacitis avec DEA, m-frontieres et alpha-frontieres 
 #DEA
 #Ici on prends dataref.all  <- QUE 2006
 
@@ -320,17 +368,13 @@ yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
 spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
 dataref.y1$DEA <-1/eff(spam)
 
-# M-frontier 
-
-M.order<-100
-M.rep <-200
-# Scores output-oriented 
+# M-frontier -  Scores output-oriented 
 
 spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
 dataref.y1$Mscore <- spam2$output 
 
 #alpha-frontiere
-alpha <- 0.95
+
 foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
 dataref.y1$Ascore <-foo$output
 
@@ -484,10 +528,14 @@ for (k in 1:length(i1)) {
 <<echo =FALSE, results = tex>>=
 # mise en forme du tableau
 names(table.malm.ww) <- c("An1", "An2", "Malm", "Pure Eff", "Scale" , "Pure Tech" , "ScaleTech")
-foo3 <- xtable(table.malm.ww, label ="malmquistWW", caption = "Malmquist idexes (average) decompsed following  SW(1998) et WW (1999) for a choice of successive years")
+foo3 <- xtable(table.malm.ww, label ="malmquistWW", caption = "Malmquist indexes (average) decompsed following  SW(1998) et WW (1999) for a choice of successive years")
 digits(foo3)[c(2,3)] <- 0
 print(foo3)
 @
+
+
+
+
 
 \newpage
 
@@ -502,7 +550,6 @@ stars(Sub[1:10,], len = 0.8, key.loc = c(1, 1.5), main = "Airlines Y-K-L typolog
 ## Attention noms faux !!
 
 @
-
 % Pas utilis??...
 <<echo=FALSE, results=hide, fig=FALSE >>=
 summary(subset(Mydata, year=annee2, select =c(Y, L)))
