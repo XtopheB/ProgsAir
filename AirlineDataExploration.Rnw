@@ -6,7 +6,7 @@
 
 \documentclass[a4paper]{article}
 
-\title{An exploration of THE Airlines database}
+\title{An Exploration of Airlines Productivity \& Efficiency (using merge6.csv)}
 \author{Christophe }
 
 \usepackage{Sweave, setspace,graphicx,srcltx,enumitem,harvard, subfig}
@@ -41,12 +41,18 @@ rm(list=ls())
 #setwd("D:/progs/Air/progs")   
 setwd("C:/Chris/zprogs/Air/progs")   
 
-library(Benchmarking)
-library(foreign)
-library(np)
+
 library(Hmisc)  #  <- Misc. statistiques descriptives  
 library(ineq)  # pour les inganil??s (HHI,..)
 library(reporttools)  # pour les tables
+
+library(foreign)
+library(np)
+
+library(Benchmarking)
+library(frontiles)
+library(FEAR)
+library(xtable)
 
 #library(psych)  #  <- statistiques descriptives pour psychologues
 #library(pastecs) #  <- statistiques descrioptives pour Space-Time Ecological Series
@@ -250,7 +256,7 @@ legend("topleft",legend=c(paste("Prod. en",annee1), paste("Prod. en",annee2)),lt
 
 @
 
-\section{productivity}
+\section{Productivity \& efficency}
 
 <<echo=false,results=tex>>=
 
@@ -297,13 +303,200 @@ tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab
 
 
 
+\subsection{DEA, m-frontiers \& $ \alpha$-frontier in \Sexpr{annee1} and \Sexpr{annee2}}
+
+<<echo=false,results=tex>>=
+annee =annee1
+# Calcul des efficacitis avec DEA, m-frontihres et alpha-frontieres 
+#DEA
+#Ici on prends dataref.all  <- QUE 2006
+
+dataref.y1 <- subset(Workdata,year==annee )  # <- QUE 2002
+nref.y1=nrow(dataref.y1)
+
+xref=matrix(c(dataref.y1$K,dataref.y1$L,dataref.y1$M),nrow=nref.y1,ncol=3)
+yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
+
+spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
+dataref.y1$DEA <-1/eff(spam)
+
+# M-frontier 
+
+M.order<-100
+M.rep <-200
+# Scores output-oriented 
+
+spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
+dataref.y1$Mscore <- spam2$output 
+
+#alpha-frontiere
+alpha <- 0.95
+foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
+dataref.y1$Ascore <-foo$output
+
+#Table
+Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs).")
+Mystats <-  list( "mean", "min", "median",  "max", "n", "na")
+Mylab <- "Monlabel"
+Myvars<- with(dataref.y1, data.frame( "DEA (vrs)" = dataref.y1$DEA,
+                                      "m-Frontier" = dataref.y1$Mscore,
+                                      "alpha-Frontier" = dataref.y1$Ascore
+                                       )                                                                                                                          
+                                      )
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+
+<<echo=false,results=tex>>=
+annee =annee2
+# Calcul des efficacitis avec DEA, m-frontihres et alpha-frontieres 
+
+#DEA
+dataref.y2 <- subset(Workdata,year==annee )  
+nref.y2=nrow(dataref.y2)
+
+xref=matrix(c(dataref.y2$K,dataref.y2$L,dataref.y2$M),nrow=nref.y2,ncol=3)
+yref=matrix(c(dataref.y2$Y),nrow=nref.y2,ncol=1)
+
+spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
+dataref.y2$DEA <-1/eff(spam)
+
+# M-frontier 
+# Scores output-oriented 
+
+spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
+dataref.y2$Mscore <- spam2$output 
+
+#alpha-frontiere
+foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
+dataref.y2$Ascore <-foo$output
+
+#Table
+Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs).")
+Mystats <-  list( "mean", "min", "median",  "max", "n", "na")
+Mylab <- "Monlabel"
+Myvars<- with(dataref.y2, data.frame( "DEA (vrs)" = dataref.y2$DEA,
+                                      "m-Frontier" = dataref.y2$Mscore,
+                                      "alpha-Frontier" = dataref.y2$Ascore
+                                       )                                                                                                                          
+                                      )
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+
+\subsection{Detailled airlines efficiency scores}
+
+<<echo =FALSE, results = tex>>=
+# mise en forme du tableau
+
+spam <- cbind(dataref.y1$carriername, dataref.y1$DEA, dataref.y1$Mscore, dataref.y1$Ascore)
+spam <- spam[order(- dataref.y1$DEA, - dataref.y1$Mscore, - dataref.y1$Ascore),]
+foo2 <- xtable(spam[,], label ="Eff", caption = paste("Airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs)."))
+
+names(foo2) <- c("Airline", "DEA Score", "M-Score", "alpha-Score")
+digits(foo2)[c(3,5)] <- 2 
+print(foo2, include.colnames=TRUE )
+@
+
+<<echo =FALSE, results = tex>>=
+# mise en forme du tableau pour Year 2
+
+spam <- cbind(dataref.y2$carriername, dataref.y2$DEA, dataref.y2$Mscore, dataref.y2$Ascore)
+spam <- spam[order(- dataref.y2$DEA, - dataref.y2$Mscore, - dataref.y2$Ascore),]
+foo2 <- xtable(spam[,], label ="Eff", caption = paste("Airlines efficiency, year",annee2,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs)."))
+
+names(foo2) <- c("Airline", "DEA Score", "M-Score", "alpha-Score")
+digits(foo2)[c(3,5)] <- 2 
+print(foo2, include.colnames=TRUE )
+@
+
+\clearpage
 \newpage
+
+\section{Malmquist decomposition (Simar \& Wilson 1998 ;  Wheelock \& Wilson, 1999) }
+
+
+Malmquist decomposition proposed by Simar \& Wilson (1998) \&  Wheelock \& Wilson (1999) splits the malmquist index into 4 componnets: Pure efficiency change, Scale change, Pure technilogy change \ & Scale technology change. This decomposition uses intensively DEA estimation (both in CRS and VRS) and follows the formula:
+
+\begin{eqnarray*}
+    MI &=& Pure.Eff \times Scale \\
+        &\times&  Pure.Tech\\
+        &\times& Scale.Tech \\
+       &=& \left(\frac{D^{VRS}_\textbf{c}(x_\textbf{c}, y_\textbf{c})}{D^{VRS}_\textbf{b}(x_\textbf{b}, y_\textbf{b})}\right)
+       \times \left(\frac{{D^{CRS}_\textbf{c}(x_\textbf{c}, y_\textbf{c})} \;/\; {D^{VRS}_\textbf{c}(x_\textbf{c}, y_\textbf{c})}}{{D^{CRS}_\textbf{b}(x_\textbf{b}, y_\textbf{b})} \;/\; {D^{VRS}_\textbf{b}(x_\textbf{b}, y_\textbf{b})}}\right)\\
+       & \times&  \left(\frac{D^{VRS}_\textbf{b}(x_\textbf{c}, y_\textbf{c})}{D^{VRS}_\textbf{c}(x_\textbf{c}, y_\textbf{c})}
+       \times  \frac{D^{VRS}_\textbf{b}(x_\textbf{b}, y_\textbf{b})}{D^{VRS}_\textbf{c}(x_\textbf{b}, y_\textbf{b})}
+     \right)^{0.5}\\
+     & \times&  \left(
+     \frac{D^{CRS}_\textbf{b}(x_\textbf{c}, y_\textbf{c}) \;/\; D^{VRS}_\textbf{b}(x_\textbf{c}, y_\textbf{c})}
+     {D^{CRS}_\textbf{c}(x_\textbf{c}, y_\textbf{c})\;/\; D^{VRS}_\textbf{c}(x_\textbf{c}, y_\textbf{c})}
+       \times  \frac{D^{CRS}_\textbf{b}(x_\textbf{b}, y_\textbf{b})\;/\;D^{VRS}_\textbf{b}(x_\textbf{b}, y_\textbf{b})}
+       {D^{CRS}_\textbf{c}(x_\textbf{b}, y_\textbf{b}) \;/\; D^{VRS}_\textbf{c}(x_\textbf{b}, y_\textbf{b})}
+     \right)^{0.5}
+\end{eqnarray*}
+\smallskip
+
+where $D^{CRS}_t(x,y)$ incorporates  the assumption of \textit{Constant} Return to Scale (CRS), while $D^{VRS}_t(x,y)$ incorporates  the assumption of \textit{Variable} Return to Scale (VRS).\\
+
+<<echo=FALSE, results=hide>>=
+# definiton of elements 
+i1=seq(annee1, annee2-1, by=1)  # An 1
+i2=seq(annee1+1,annee2, by=1)   # An 2
+# ajout de 2 sequences qui nous interessent (et d'un saut par 00)
+i1<- c(i1, 1900,2002)
+i2 <-c(i2,1900, 2008)
+
+#---------------------------------------------
+## III: Calcul des indisces DE Malmqvuist(Simar-Wilson 1998 ; Wheelock-Wilson, 1999)
+table.malm.ww <-data.frame(toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0)) 
+
+for (k in 1:length(i1)) {
+    data1 <- subset(Workdata,year==i1[k])  # <-  annie 1
+    n1=nrow(data1)
+    data1.x=t(matrix(c(data1$K,data1$L,data1$M),nrow=n1,ncol=3))
+    data1.y=t(matrix(c(data1$Y),nrow=n1,ncol=1))
+    data1.id=t(matrix(c(data1$Id),nrow=n1,ncol=1))
+    
+    data2 <- subset(Workdata,year==i2[k])  # <-  annie 2
+    n2=nrow(data2)
+    data2.x=t(matrix(c(data2$K,data2$L,data2$M),nrow=n2,ncol=3))
+    data2.y=t(matrix(c(data2$Y),nrow=n2,ncol=1))
+    data2.id=t(matrix(c(data2$Id),nrow=n2,ncol=1))
+
+    #definition de la Table 
+    #estimation
+    malm.com <-FEAR::malmquist.components(X1=data1.x, Y1=data1.y, ID1=data1.id, 
+                                X2=data2.x, Y2=data2.y, ID2=data2.id, 
+                                ORIENTATION=2)
+    
+    malm.all <-malmquist(LIST=malm.com)
+    # Decomposition fagon Fare et al...
+    spam <-cbind(i1[k],i2[k], mean(malm.all$malm,na.rm = TRUE), 
+                 mean(malm.all$pure.eff,na.rm = TRUE),  
+                 mean(malm.all$scale,na.rm = TRUE), 
+                 mean(malm.all$pure.tech,na.rm = TRUE),
+                 mean(malm.all$scale.tech, na.rm = TRUE))
+    table.malm.ww <-rbind(table.malm.ww,spam)
+}  
+
+@ 
+
+
+
+<<echo =FALSE, results = tex>>=
+# mise en forme du tableau
+names(table.malm.ww) <- c("An1", "An2", "Malm", "Pure Eff", "Scale" , "Pure Tech" , "ScaleTech")
+foo3 <- xtable(table.malm.ww, label ="malmquistWW", caption = "Malmquist idexes (average) decompsed following  SW(1998) et WW (1999) for a choice of successive years")
+digits(foo3)[c(2,3)] <- 0
+print(foo3)
+@
+
+\newpage
+
 Essais en tous genres...
 
 <<echo=FALSE,  fig=TRUE >>=
 
 Noms<-unique(Mydata$carriername)
-Sub<-subset(Mydata, year==2008 & Y >0 & Region == 1 , select = c(Y, K, L, E))
+Sub<-subset(Workdata, year==2008 & Y >0 & Region == 1 , select = c(Y, K, L, E))
 
 stars(Sub[1:10,], len = 0.8, key.loc = c(1, 1.5), main = "Airlines Y-K-L typology", draw.segments = TRUE, labels=Noms[1:4])
 ## Attention noms faux !!
