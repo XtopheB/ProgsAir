@@ -3,6 +3,7 @@
 % 24/01/2013 :  Modification using Stata file created by MergePattern.do  
 % 3/02/2013 : Integration of various statistics for 2 reference years. 
 %           : We decide to work with data for which Y, K, L & M are available i.e. test0>0 
+%05/02/2013 : Nouveau jeu de donn??es en entr??e et donc nouvelles sorties (pas de modif de code)
 
 \documentclass[a4paper]{article}
 
@@ -63,6 +64,8 @@ library(calibrate)  # for labelling points (textxy)
 fichier ="AllyearsKLEM.dta"
 
 dataall <- read.dta(paste("../data/",fichier, sep=""))  
+
+
 dim(dataall)
 Mydata <- data.frame(dataall)
 
@@ -70,6 +73,7 @@ Mydata <- data.frame(dataall)
 Mydata$Y <- Mydata$Y/1000
 Mydata$K <- Mydata$K/1000
 Mydata$E <- Mydata$E/1000
+Mydata$M <- Mydata$M/1000
 
 ### SUBSET of "BIG AIRLINES" !!
 MyBigdata <-subset(Mydata, Y> quantile(Y, .75, na.rm = TRUE)  & Test0 > 0) 
@@ -86,7 +90,6 @@ M.order<-100
 M.rep <-200
 alpha <- 0.975
 
-
 @
 
 % ------------Debut du papier -------------
@@ -100,9 +103,27 @@ We should emphasize that only \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0
 
 
 \bigskip 
+<<echo=false,results=tex>>=
+# Creation de la table ALL YEARS
+
+Mycap <- paste("Summary of production variables ( all years) for",nrow(unique(subset(Workdata,  select= c(carrier)))),"unique airlines")
+
+Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
+Mylab <- "Monlabel"
+Myvars<- with(Workdata, data.frame(   "Y" = Workdata$Y,
+                                      "K" = Workdata$K,
+                                      "L" = Workdata$L,
+                                      "E" = Workdata$E,
+                                      "M" = Workdata$M
+                                  )                                                                                                                 )
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+
+
+
 
 <<echo=false,results=tex>>=
-# Cr??ation de la table
+# Creation de la table
 annee <-annee1
 # definition de l'??chantillon
 Tempdata <-subset(Workdata, year== annee)
@@ -238,7 +259,6 @@ legend("topleft",legend=c("Herfindahl index (left scale)", "CR4 index (right sca
 
 @
 
-
 \newpage
 <<echo=FALSE, results=hide>>=
 
@@ -263,10 +283,50 @@ legend("topleft",legend=c(paste("Prod. en",annee1), paste("Prod. en",annee2)),lt
 
 @
 
+<<echo=FALSE,  fig=TRUE >>=
+annee <- annee1
+Sub<-subset(Workdata, year==annee & Test0 >0)
+Sub <- Sub[order(-Sub$Y),]
+Nsub <- nrow(Sub)
+Nshow <- 19
+spam <- subset(Sub, select = c(Y, K, L, E, M))
+Noms<-unique(Sub$carriername)[1:Nshow]
+
+stars(spam[1:Nshow,], 
+      len = 0.8, 
+      key.loc = c(10, 1.5),  
+      main = paste("Airlines Y KLEM typology, year", annee,""), 
+      sub = paste("(", Nsub,"airlines) only", Nshow,"shown"),
+      draw.segments = TRUE, 
+      labels=Noms[1:Nsub]
+      )
+@
+
+<<echo=FALSE,  fig=TRUE >>=
+annee <- annee2
+#annee <-2006
+Sub<-subset(Workdata, year==annee & Test0 >0)
+Sub <- Sub[order(-Sub$Y),]
+Nsub <- nrow(Sub)
+Nshow <- 19
+spam <- subset(Sub, select = c(Y, K, L, E, M))
+Noms<-unique(Sub$carriername)[1:Nshow]
+
+stars(spam[1:Nshow,], 
+      len = 0.8, 
+      key.loc = c(10, 1.5),  
+      main = paste("Airlines Y KLEM typology, year", annee,""), 
+      sub = paste("(", Nsub,"airlines) only", Nshow,"shown"),
+      draw.segments = TRUE, 
+      labels=Noms[1:Nsub]
+      )
+@
+
+\clearpage
+
 \section{Productivity \& efficency}
 
 <<echo=false,results=tex>>=
-
 # definition de variables
 Workdata$YoverK <- Workdata$Y / Workdata$K
 Workdata$YoverL <- Workdata$Y / Workdata$L
@@ -366,17 +426,17 @@ xref=matrix(c(dataref.y1$K,dataref.y1$L,dataref.y1$M),nrow=nref.y1,ncol=3)
 yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
 
 spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
-dataref.y1$DEA <-1/eff(spam)
+dataref.y1$DEA <-round(1/eff(spam), 3)
 
 # M-frontier -  Scores output-oriented 
 
 spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
-dataref.y1$Mscore <- spam2$output 
+dataref.y1$Mscore <- round(spam2$output, 3) 
 
 #alpha-frontiere
 
 foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
-dataref.y1$Ascore <-foo$output
+dataref.y1$Ascore <-round(foo$output, 3)
 
 #Table
 Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs).")
@@ -402,17 +462,17 @@ xref=matrix(c(dataref.y2$K,dataref.y2$L,dataref.y2$M),nrow=nref.y2,ncol=3)
 yref=matrix(c(dataref.y2$Y),nrow=nref.y2,ncol=1)
 
 spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
-dataref.y2$DEA <-1/eff(spam)
+dataref.y2$DEA <-round(1/eff(spam), 3)
 
 # M-frontier 
 # Scores output-oriented 
 
 spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
-dataref.y2$Mscore <- spam2$output 
+dataref.y2$Mscore <- round(spam2$output, 3) 
 
 #alpha-frontiere
 foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
-dataref.y2$Ascore <-foo$output
+dataref.y2$Ascore <- round(foo$output, 3)
 
 #Table
 Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs).")
@@ -432,11 +492,11 @@ tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab
 # mise en forme du tableau
 
 spam <- cbind(dataref.y1$carriername, dataref.y1$DEA, dataref.y1$Mscore, dataref.y1$Ascore)
-spam <- spam[order(- dataref.y1$DEA, - dataref.y1$Mscore, - dataref.y1$Ascore),]
-foo2 <- xtable(spam[,], label ="Eff", caption = paste("Airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs)."))
+spam <- spam[order( - dataref.y2$Ascore  - dataref.y2$Mscore - dataref.y2$DEA),]
+#spam <- spam[order(- dataref.y2$DEA, - dataref.y2$Mscore, - dataref.y2$Ascore),]
+foo2 <- xtable(spam[,], digits=2, label ="Eff", caption = paste("Airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs)."))
 
 names(foo2) <- c("Airline", "DEA Score", "M-Score", "alpha-Score")
-digits(foo2)[c(3,5)] <- 2 
 print(foo2, include.colnames=TRUE )
 @
 
@@ -444,12 +504,13 @@ print(foo2, include.colnames=TRUE )
 # mise en forme du tableau pour Year 2
 
 spam <- cbind(dataref.y2$carriername, dataref.y2$DEA, dataref.y2$Mscore, dataref.y2$Ascore)
-spam <- spam[order(- dataref.y2$DEA, - dataref.y2$Mscore, - dataref.y2$Ascore),]
-foo2 <- xtable(spam[,], label ="Eff", caption = paste("Airlines efficiency, year",annee2,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs)."))
+spam <- spam[order( - dataref.y2$Ascore  - dataref.y2$Mscore - dataref.y2$DEA),]
+#spam <- spam[order(- dataref.y2$DEA, - dataref.y2$Mscore, - dataref.y2$Ascore),]
+
+foo2 <- xtable(spam[,], digits=2, label ="Eff", caption = paste("Airlines efficiency, year",annee2,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs)."))
 
 names(foo2) <- c("Airline", "DEA Score", "M-Score", "alpha-Score")
-digits(foo2)[c(3,5)] <- 2 
-print(foo2, include.colnames=TRUE )
+print(foo2, include.colnames=TRUE)
 @
 
 \clearpage
@@ -458,7 +519,7 @@ print(foo2, include.colnames=TRUE )
 \section{Malmquist decomposition (Simar \& Wilson 1998 ;  Wheelock \& Wilson, 1999) }
 
 
-Malmquist decomposition proposed by Simar \& Wilson (1998) \&  Wheelock \& Wilson (1999) splits the malmquist index into 4 componnets: Pure efficiency change, Scale change, Pure technilogy change \ & Scale technology change. This decomposition uses intensively DEA estimation (both in CRS and VRS) and follows the formula:
+Malmquist decomposition proposed by Simar \& Wilson (1998) \&  Wheelock \& Wilson (1999) splits the malmquist index into 4 componnets: Pure efficiency change, Scale change, Pure technilogy change \& Scale technology change. This decomposition uses intensively DEA estimation (both in CRS and VRS) and follows the formula:
 
 \begin{eqnarray*}
     MI &=& Pure.Eff \times Scale \\
@@ -534,22 +595,8 @@ print(foo3)
 @
 
 
+%Essais en tous genres...
 
-
-
-\newpage
-
-Essais en tous genres...
-
-<<echo=FALSE,  fig=TRUE >>=
-
-Noms<-unique(Mydata$carriername)
-Sub<-subset(Workdata, year==2008 & Y >0 & Region == 1 , select = c(Y, K, L, E))
-
-stars(Sub[1:10,], len = 0.8, key.loc = c(1, 1.5), main = "Airlines Y-K-L typology", draw.segments = TRUE, labels=Noms[1:4])
-## Attention noms faux !!
-
-@
 % Pas utilis??...
 <<echo=FALSE, results=hide, fig=FALSE >>=
 summary(subset(Mydata, year=annee2, select =c(Y, L)))

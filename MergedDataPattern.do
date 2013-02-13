@@ -2,6 +2,7 @@
 /*				: remplacement des missings, des ", " etc..*/
 /* 23/01/2013 	: Visualisation des missing par variable et par an   */
 /* 24/01/2013	: Definition of variables Y, K, L, E,  M (to discuss)     */
+/* 05/02/2012 	: Nouvelles définitions des inputs et des outputs (C +N ) */
 
 
 /* Remove everything  */
@@ -42,6 +43,9 @@ foreach v of local Allvar{
 
 egen Id=group(carrier)   /* Generates a unique identifier for each carrier  */
 order Id carrier* year 
+/* Attention : l'unité est me milier de dollars sauf totalpersonneltotalexpenditure  */
+replace totalpersonneltotalexpenditure = totalpersonneltotalexpenditure/1000
+
 
 /* On peut incorporer des zones géographiques en utilsant le code pays */
 gen Region = 0
@@ -66,32 +70,51 @@ label value Region typoRegion
 
 /* Mise en forme données logitudinales  */
 
-xtset  Id year
-xtdescribe, patterns(50)
-gen M = 1 /* provisoire */
+*xtset  Id year
+*xtdescribe, patterns(50)
 
 /*********************************************	*/
 /* variables of interest 						*/
 
+/*  Computation of new input variables (C+ N) */
+
+gen KnonFlying = oe_amortimobfgt/priceindex  /* non flying capital (in value)*/
+gen KflyingExpenditure = oe_fgtequipinsu + oe_fgtrentequip  + oe_fgtequipmain + oe_amortfgtequi
+
+gen MaterialExpenditure = (oe_totoperatexp - totalpersonneltotalexpenditure - fuelexp - KflyingExpenditure -oe_amortimobfgt)
+gen MaterialQuantity = MaterialExpenditure/priceindex
+* voir si on remplace les M <0 par 0
+
+gen PaxRevenue = or_schdpax + or_nschdpaxexcb + or_schdexcebag
+gen FreightRevenue = or_schdfreight +or_schdmail + or_nschdfgtmail
+
+/* Création des  outputs  */
+gen Ypax = rpktotal
+gen Yfreight = rtktotal -tkpaxtotal
+gen Yincidental = or_othertot /priceindex
+* todo créer un indice cf Diewert et al. (1982) Nath reférence à citer....
+gen Yrevenue = or_total/priceindex
+
 /* Capital */
-local Kvar "mtowkg"
+local Kvar "mtowkg oe_amortimobfgt KnonFlying KflyingExpenditure "
 
 /* - Labor                                      */
-local Lvar "totalpersonnelendyearpersonnel pilotsandcopilotstotalexpenditur totalpersonneltotalexpenditure pilotsandcopilotsendyearpersonne"
+local Lvar "totalpersonnelendyearpersonnel  totalpersonneltotalexpenditure pilotsandcopilotstotalexpenditur  pilotsandcopilotsendyearpersonne"
 
 /* - Energy                                     */
 local Evar "fuelexp fuelprice fuelquantity"
 
 /* - Material                                    */
-local Mvar "M"
+local Mvar "MaterialExpenditure MaterialQuantity"
 
 /* - Output                                    */
-local Outvar " or_total or_othertot rpktotal rtktotal rpktotaldom rpktotalint rtktotaldom rtktotalint tkpaxtotal"
+local Outvar " Ypax Yfreight Yincidental Yrevenue PaxRevenue  FreightRevenue  or_total or_othertot rpktotal rtktotal rpktotaldom rpktotalint rtktotaldom rtktotalint tkpaxtotal"
+
 
 /* Liste de toutes les variables pertinentes */
 local KLEMYvar  "`Kvar' `Lvar' `Evar' `Mvar' `Outvar'"
 
-
+sum `KLEMYvar'
 des `KLEMYvar', full
 
 /* Tentative de visualisation des missings */
@@ -121,12 +144,15 @@ foreach v of local KLEMYvar{
 mat list nonnul
 outtable using Graphics/table2, mat(nonnul) replace
 
-/* =========================== CHOIX DES VARIABLES  ===================*/ 
-gen Y = rpktotal
+/* =========================== CREATION DES VARIABLES d'INTERET ===================*/ 
+
+/* CHOIX DES VARIABLES FINALES  */
+
+gen Y = Yrevenue
 gen K = mtowkg
 gen L = totalpersonnelendyearpersonnel
 gen E = fuelquantity
-*gen M = 1			/* <<<--------- A changer ici   */
+gen M = MaterialQuantity	
 gen YsurK = Y/K if K != 0
 gen YsurL = Y/L if L != 0
 gen YsurE = Y/E if E != 0
@@ -149,7 +175,7 @@ gen EL=E*L
 bysort year : count if EL >0 & EL!=.
 
 bysort year : list carriername if Test0 >0 & Test0!=.
-edit Id carriername year if test0 >0 & test0 !=.
+edit Id carriername year if Test0 >0 & Test0 !=.
 
 
 /* Mise en ordre des données et exportation */
@@ -160,6 +186,8 @@ preserve
 keep Id carrier*  year Y* K L E M  country* Region  Test0
 keep if year !=2010
 save   ../data/AllyearsKLEM.dta, replace
+/* On préfère sauver en csv...*/
+outsheet using  ../data/AllyearsKLEM.csv , replace delimiter(";")
 restore
 
 
