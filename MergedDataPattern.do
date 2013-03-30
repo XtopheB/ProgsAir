@@ -182,14 +182,22 @@ edit Id carriername year if Test0 >0 & Test0 !=.
 
 order Id carrier* year Y K L E M `KLEMYvar' country* Region Test0
 sort carrier year
-preserve
-keep Id carrier*  year Y* K L E M  country* Region  Test0
+preserve  
+/* On garde un fichier complet pour "l'analyse des trous " Modifié le 30/03/2013 */
+keep Id carrier* year Y K L E M `KLEMYvar' country* Region Test0
 keep if year !=2010
+label data "File created by MergedDataPattern.do, many (slected) Y, KLEM"
+save   ../data/MultiYKLEM.dta, replace
+/* On préfère sauver en csv...*/
+outsheet using  ../data/MultiYKLEM.csv , replace delimiter(";")
+
+/* Fichier utilisé par R avec un seul Y, K, L, E, M */
+label data "File created by MergedDataPattern.do, Only one variable for each KLEM"
+keep Id carrier*  year Y* K L E M  country* Region  Test0
 save   ../data/AllyearsKLEM.dta, replace
 /* On préfère sauver en csv...*/
 outsheet using  ../data/AllyearsKLEM.csv , replace delimiter(";")
 restore
-
 
 
 /*Visualisation between - within par variable   */
