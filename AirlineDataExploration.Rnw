@@ -39,8 +39,8 @@ rm(list=ls())
 
 ## Second change the working directory
 
-setwd("D:/progs/Air/progs")   
-#setwd("C:/Chris/zprogs/Air/progs")   
+#setwd("D:/progs/Air/progs")   
+setwd("C:/Chris/zprogs/Air/progs")   
 
 
 library(Hmisc)  #  <- Misc. statistiques descriptives  
@@ -56,7 +56,7 @@ library(FEAR)
 library(xtable)
 library(calibrate)  # for labelling points (textxy)
 library(MASS)
-library(ggplot2) 
+#library(ggplot2) 
 
 #library(psych)  #  <- statistiques descriptives pour psychologues
 #library(pastecs) #  <- statistiques descrioptives pour Space-Time Ecological Series
@@ -70,6 +70,7 @@ dataall <- read.dta(paste("../data/",fichier, sep=""))
 
 dim(dataall)
 Mydata <- data.frame(dataall)
+Mydata <- Mydata[with(Mydata, order(Region, year)), ]
 
 # New unit for Y, K, E 
 Mydata$Y <- Mydata$Y/1000
@@ -88,7 +89,7 @@ Mydata$YoverM <- Mydata$Y/Mydata$M
 MyBigdata <-subset(Mydata, Y> quantile(Y, .75, na.rm = TRUE)) 
 MyBigdata.trim <-subset(Mydata, Y> quantile(Y, .75, na.rm = TRUE)  & Test0 > 0) 
 
-Workdata <-subset(Mydata, Test0 > 0)   #<<<< ---- Workdata = tout l'échantillon sauf les erreurs
+Workdata <-subset(Mydata, Test0 > 0)   #<<<< ---- Workdata = tout l'echantillon sauf les erreurs
 
 attach(Workdata)
 # Definition of the period under scrutiny
@@ -96,9 +97,9 @@ annee1=2002
 annee2=2008
 
 # Parameters 
-M.order<-100
+M.order<-50
 M.rep <-200
-alpha <- 0.975
+alpha <- 0.985
 
 @
 
@@ -111,38 +112,59 @@ alpha <- 0.975
 \section{Data}
 We are looking at the file \textbf{\Sexpr{fichier}},  we have \textbf{\Sexpr{nrow(dataall)}} observations and \textbf{\Sexpr{ncol(dataall)}} variables over \Sexpr{length(unique(Mydata$year))} years. We found \textbf{\Sexpr{length(unique(Mydata$carrier))}} different carriers in the database.\\
 
+We should emphasize that only \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0, select= c(carrier))))}} carriers  have \textbf{all} production variables (i.e. Y, K, L E \& M not null)  at least one year (based on "Test0" variable).
+
+% Table des effectifs
+<<echo=FALSE, results=hide>>=
+## Definition de la Table
+table.data<-data.frame(toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0)) 
+
+x=seq(1995, 2009, by=1)  
+nbtemp=length(x)
+
+for (i in 1:length(x)) {
+    data1 <- subset(Mydata, year==x[i])  
+    n1=nrow(data1)
+    data2 <- subset(Mydata, year==x[i] & Test0>0) 
+    n2=nrow(data2)
+    data3 <- subset(MyBigdata, year==x[i]  ) 
+    n3=nrow(data3)
+    data4 <- subset(MyBigdata, year==x[i] & Test0>0) 
+    n4=nrow(data4)
+    
+    spam <-cbind(x[i],n1, n2,n3, n4) 
+    table.data <-rbind(table.data,spam)
+} 
+@
+
+<<echo =FALSE, results = tex>>=
+# mise en forme du tableau
+names(table.data) <- c("Year", "N", "N.Complete", "N.Big", "N.Big.Complete")
+foo <- xtable(table.data, 
+                caption =paste("The total nb of obs. is",nrow(Mydata),", for",
+                             nrow(unique(subset(Mydata, select= c(carrier)))),"unique and ",
+                             nrow(unique(subset(Mydata, Test0 >0, select= c(carrier)))), 
+                             "complete airlines."), align = "ll|cccc")
+digits(foo)[c(2:6)] <- 0
+print(foo)
+@
+
+
 \subsection{Definition of variables}
 
 \subsection{Descriptive statistics}
-We should emphasize that only \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0, select= c(carrier))))}} carriers have non null production variables (i.e. Y, K, L E \& M not null)  at least one year (based on "test0" variable).  In 2008, this number is of \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0 & year == 2008, select= c(carrier))))}} carriers. Below is a partial overview of the file's main variables for those \textbf{fully} observable airlines.
+We choose \Sexpr{annee1} and  \Sexpr{annee2} to be 2 years of reference in our analysis. The number of complete observations is of \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0 & year == annee2, select= c(carrier))))}} carriers for \Sexpr{annee2}. Below is a partial overview of the file's production variables for those \textbf{fully} observable airlines those 2 years.
 
-
-\bigskip 
-<<echo=false,results=tex>>=
-# Creation de la table ALL YEARS
-
-Mycap <- paste("Summary of production variables ( all years) for",nrow(unique(subset(Workdata,  select= c(carrier)))),"unique airlines")
-
-Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
-Mylab <- "Monlabel"
-Myvars<- with(Workdata, data.frame(   "Y" = Workdata$Y,
-                                      "K" = Workdata$K,
-                                      "L" = Workdata$L,
-                                      "E" = Workdata$E,
-                                      "M" = Workdata$M
-                                  )                                                                                                                 )
-tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
-@
 
 <<echo=false,results=tex>>=
 # Creation de la table
 annee <-annee1
-# definition de l'??chantillon
+# definition de l'echantillon
 Tempdata <-subset(Workdata, year== annee)
 
 #nrow(unique(subset(Mydata, Test0 >0 & year == 2008, select= c(carrier))))}}
 
-Mycap <- paste("Summary of production variables (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"unique airlines")
+Mycap <- paste("Summary of production variables (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"airlines complete")
 
 Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
 Mylab <- "Monlabel"
@@ -191,10 +213,11 @@ tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab
 
 \section{Exploration of major airlines}
 
-If we take the airline with output $Y$ above the 3rd upper quantile(= \Sexpr{round(quantile(Mydata$Y, .75, na.rm = TRUE), 0)} x 1000),  we get  \Sexpr{length(unique(MyBigdata$carrier))} airlines)\footnote{The carrier under scrutiny on this sample are \Sexpr{list((unique(MyBigdata$carriername)))}}
+If we take airlines with output $Y$ above the 3rd upper quantile (= \Sexpr{round(quantile(Mydata$Y, .75, na.rm = TRUE), 0)} x 1000),  we get  \Sexpr{length(unique(MyBigdata$carrier))} airlines for all years)
 
-A graph on the output (Y) of the industry's main carrier over time. Here we exclude airlines with problems detected (test0>0) . 
+A graph on the output (Y) of the industry's main carrier over time. Here we exclude airlines with problems detected (Test0>0), leaving us with \textbf{\Sexpr{nrow(unique(subset(MyBigdata, Test0 >0, select= c(carrier))))}}  major airlines.\footnote{The major with complete production information  under scrutiny on this sample are \Sexpr{list(unique(subset(MyBigdata, Test0 >0, select= c(carriername))))}}
 
+%graph of Y over time !!!
 <<echo=FALSE,  fig=TRUE >>=
 # Create Line Chart
 nc <- length(unique(MyBigdata.trim$carrier))
@@ -230,132 +253,8 @@ title("Big Airlines Output (Y) over time",
 
 @
 
-<<echo=false,results=tex>>=
-
-# definition de l'echantillon
-Tempdata <-subset(MyBigdata.trim)
-
-Mycap <- paste("Summary of partial productivity (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"unique airlines")
-Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
-Mylab <- "Monlabel"
-Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
-                                      "Y over K" = Tempdata$YoverK,
-                                      "Y over L" = Tempdata$YoverL,
-                                      "Y over E" = Tempdata$YoverE,
-                                      "Y over M" = Tempdata$YoverM
-                                  )                                                                                                                 )
-# Creation de la table
-tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
-@
-
-Now, we can examine the distribution over time of partial productivity for these firms.
-
-
-
 <<echo=FALSE,  fig=TRUE >>=
-#bpplot(split(RPKTotal, year))
-Tempdata <-MyBigdata.trim
-op <- par(mfrow = c(2, 2)) # 2 x 2 pictures on one plot
-
-boxplot(split(Tempdata$YoverK, Tempdata$year), outline=FALSE, col="bisque")
-title(main="Y/K over years", 
-      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
-#Effectifs <-aggregate(Tempdata$YoverK, by=list(Tempdata$year), FUN=length)
-#legend("topleft", title="Effectif",
-#    legend = Effectifs$x[1:16],  horiz=TRUE,  cex = 0.72, text.font = 0.6)
-
-
-boxplot(split(Tempdata$YoverL, Tempdata$year), outline=FALSE, col="bisque")
-title(main="Y/L over years", 
-      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
-
-boxplot(split(Tempdata$YoverE, Tempdata$year), outline=FALSE, col="bisque")
-title(main="Y/M over years", 
-      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
-
-boxplot(split(Tempdata$YoverM, Tempdata$year), outline=FALSE, col="bisque")
-title(main="Y/E over years", 
-      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
-
-#bpplot(RPKTotal)
-par(op)   
-@
-
-<<echo=FALSE,  fig=TRUE >>=
-#bpplot(split(RPKTotal, year))
-boxplot(split(Tempdata$Y, Tempdata$year), outline=FALSE, notch=FALSE, col="bisque")
-title(paste("Y distribution over years, for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
-
-#bpplot(RPKTotal)
-@
-
-
-An overview of the industry concentration for the sample of major firms over time.  
-
-<<fig=TRUE,echo=false>>=
-MyHHI <-function(x){
-  foo<-na.omit(x)
-  xx <- mean(x)
-  y<-conc(foo, type ="H" )*10000
-  return(y)
-}
-
-
-MyCR4 <- function(x){
-  foo <- na.omit(x)
-  xx <- sort(foo, decreasing=TRUE)
-  CR4 <- (sum(xx[1:4])/sum(xx))*100
-  return(CR4)
-}
-
-
-# Attention, l'echantillon doit avoir autant d'annees que years..
-
-years <-seq(2002, 2009)
-Sample <-subset(MyBigdata.trim , year >=2002, select = c(Id,year,Y) )
-MatY <- reshape(Sample,v.names="Y", idvar= "Id", timevar="year", direction="wide")
-
-MatHHI <- apply(MatY, FUN=MyHHI,  MARGIN=2)
-MatCR4 <- apply(MatY, FUN=MyCR4,  MARGIN=2)
-
-plot(years, MatHHI[2:9], type="o" ,lty=1,  col="darkred" )
-axis(2, pretty(c(0, 1.1*max(MatHHI[2:8])),min.n=6, n=10), col='darkred')
-title(paste("Concentration over years, for",nrow(unique(subset(Sample, select= c(Id)))),"unique airlines"))
-par(new=T) 
-
-plot(years, MatCR4[2:9], type="o" , lty=2,  col="blue" , axes=F)
-axis(4, pretty(c(0, 1.1*max(MatCR4[2:8])),min.n=6, n=10), col='blue')
-#axis(4, xaxp=c(0,  1000, 1), col='blue')
-legend("topleft",legend=c("Herfindahl index (left scale)", "CR4 index (right scale)"),lty=1:2,col=c("darkred", "blue"))
-
-@
-
-\newpage
-<<echo=FALSE, results=hide>>=
-
-Mydata.y1 <- subset(MyBigdata.trim,year==annee1)
-Mydata.y2 <- subset(MyBigdata.trim,year==annee2 )
-
-foo.y1 <- ineq(Mydata.y1$Y,type="Gini")
-foo.y2 <- ineq(Mydata.y2$Y,type="Gini")
-
-@
-
-
-The Gini index equals \textbf{\Sexpr{round(foo.y1, 3)}} in \Sexpr{annee1} and \textbf{\Sexpr{round(foo.y2,3)}} in \Sexpr{annee2}. The Lorentz curves below show the distribution of output over the the industry for these years.\footnote{It shows for any \% of firms (x axis), what percentage  (y axis) of the total output they produce.}
-
-<<fig=TRUE,echo=false>>=
-
-Lorentz.y1 <- Lc(Mydata.y1$Y)
-Lorentz.y2 <- Lc(Mydata.y2$Y)
-plot(Lorentz.y1,col="darkred", lty = 1, lwd=4)
-lines(Lorentz.y2, col="blue", lty = 2, lw=2)
-legend("topleft",legend=c(paste("Prod. en",annee1), paste("Prod. en",annee2)),lty=1:2,col=c("darkred", "blue"))
-
-@
-
-<<echo=FALSE,  fig=TRUE >>=
-annee <- annee1   # <<- choix de l'année en début 
+annee <- annee1   # <<- choix de l'annC)e en dC)but 
 Workdata <- subset(MyBigdata, Test0 > 0)   # Choix des compagnies..
 Sub<-subset(Workdata, year==annee)
 Sub <- Sub[order(-Sub$Y),]
@@ -395,45 +294,182 @@ stars(spam[1:Nshow,],
 @
 
 \clearpage
+Now, we can examine the distribution over time of partial productivity for these major airlines.
+
+
+<<echo=false,results=tex>>=
+
+# definition de l'echantillon
+annee <- annee2
+Tempdata <-subset(MyBigdata, year==annee & Test0>0) 
+
+Mycap <- paste("Summary of partial productivity (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"major airlines with complete information")
+Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
+Mylab <- "Monlabel"
+Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
+                                      "Y over K" = Tempdata$YoverK,
+                                      "Y over L" = Tempdata$YoverL,
+                                      "Y over E" = Tempdata$YoverE,
+                                      "Y over M" = Tempdata$YoverM
+                                  )                                                                                                                 )
+# Creation de la table
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+
+
+<<echo=FALSE,  fig=TRUE >>=
+#bpplot(split(RPKTotal, year))
+Tempdata <-subset(MyBigdata,  Test0>0) 
+op <- par(mfrow = c(2, 2)) # 2 x 2 pictures on one plot
+
+boxplot(split(Tempdata$YoverK, Tempdata$year), outline=FALSE, col="bisque")
+title(main="Y/K over years", 
+      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
+#Effectifs <-aggregate(Tempdata$YoverK, by=list(Tempdata$year), FUN=length)
+#legend("topleft", title="Effectif",
+#    legend = Effectifs$x[1:16],  horiz=TRUE,  cex = 0.72, text.font = 0.6)
+
+
+boxplot(split(Tempdata$YoverL, Tempdata$year), outline=FALSE, col="bisque")
+title(main="Y/L over years", 
+      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
+
+boxplot(split(Tempdata$YoverE, Tempdata$year), outline=FALSE, col="bisque")
+title(main="Y/M over years", 
+      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
+
+boxplot(split(Tempdata$YoverM, Tempdata$year), outline=FALSE, col="bisque")
+title(main="Y/E over years", 
+      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
+
+#bpplot(RPKTotal)
+par(op)   
+@
+
+\section{Exploration of the whole industry}
+
+<<echo=false,results=tex>>=
+
+# definition de l'echantillon
+annee <- annee2
+Tempdata <-subset(Mydata, year==annee & Test0>0) 
+
+Mycap <- paste("Summary of partial productivity (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"airlines with complete information")
+Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
+Mylab <- "Monlabel"
+Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
+                                      "Y over K" = Tempdata$YoverK,
+                                      "Y over L" = Tempdata$YoverL,
+                                      "Y over E" = Tempdata$YoverE,
+                                      "Y over M" = Tempdata$YoverM
+                                  )                                                                                                                 )
+# Creation de la table
+tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+@
+
+Now, we can examine the distribution over time of partial productivity for all the airlines.
+
+
+<<echo=FALSE,  fig=TRUE >>=
+#bpplot(split(RPKTotal, year))
+Tempdata <-subset(Mydata,  Test0>0) 
+op <- par(mfrow = c(2, 2)) # 2 x 2 pictures on one plot
+
+boxplot(split(Tempdata$YoverK, Tempdata$year), outline=FALSE, col="bisque")
+title(main="Y/K over years", 
+      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
+#Effectifs <-aggregate(Tempdata$YoverK, by=list(Tempdata$year), FUN=length)
+#legend("topleft", title="Effectif",
+#    legend = Effectifs$x[1:16],  horiz=TRUE,  cex = 0.72, text.font = 0.6)
+
+
+boxplot(split(Tempdata$YoverL, Tempdata$year), outline=FALSE, col="bisque")
+title(main="Y/L over years", 
+      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
+
+boxplot(split(Tempdata$YoverE, Tempdata$year), outline=FALSE, col="bisque")
+title(main="Y/M over years", 
+      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
+
+boxplot(split(Tempdata$YoverM, Tempdata$year), outline=FALSE, col="bisque")
+title(main="Y/E over years", 
+      sub=paste("for",nrow(unique(subset(Tempdata, select= c(carrier)))),"unique airlines"))
+
+#bpplot(RPKTotal)
+par(op)   
+@
+
+
+
+An overview of the industry concentration for the sample of major firms over time.  
+
+<<fig=TRUE,echo=false>>=
+MyHHI <-function(x){
+  foo<-na.omit(x)
+  xx <- mean(x)
+  y<-conc(foo, type ="H" )*10000
+  return(y)
+}
+
+
+MyCR4 <- function(x){
+  foo <- na.omit(x)
+  xx <- sort(foo, decreasing=TRUE)
+  CR4 <- (sum(xx[1:4])/sum(xx))*100
+  return(CR4)
+}
+
+# Attention, l'echantillon doit avoir autant d'annees que years..
+
+years <-seq(2002, 2009)
+Sample <-subset(Mydata , year >=2002, select = c(Id,year,Y) )
+MatY <- reshape(Sample,v.names="Y", idvar= "Id", timevar="year", direction="wide")
+
+MatHHI <- apply(MatY, FUN=MyHHI,  MARGIN=2)
+MatCR4 <- apply(MatY, FUN=MyCR4,  MARGIN=2)
+
+plot(years, MatHHI[2:9], type="o" ,lty=1,  col="darkred" )
+axis(2, pretty(c(0, 1.1*max(MatHHI[2:8])),min.n=6, n=10), col='darkred')
+title(paste("Concentration over years, for",nrow(unique(subset(Sample, select= c(Id)))),"unique airlines"))
+par(new=T) 
+
+plot(years, MatCR4[2:9], type="o" , lty=2,  col="blue" , axes=F)
+axis(4, pretty(c(0, 1.1*max(MatCR4[2:8])),min.n=6, n=10), col='blue')
+#axis(4, xaxp=c(0,  1000, 1), col='blue')
+legend("topleft",legend=c("Herfindahl index (left scale)", "CR4 index (right scale)"),lty=1:2,col=c("darkred", "blue"))
+
+@
+
+\newpage
+<<echo=FALSE, results=hide>>=
+
+Mydata.y1 <- subset(Mydata,year==annee1 & Test0>0)
+Mydata.y2 <- subset(Mydata,year==annee2 & Test0>0)
+
+foo.y1 <- ineq(Mydata.y1$Y,type="Gini")
+foo.y2 <- ineq(Mydata.y2$Y,type="Gini")
+
+@
+
+
+The Gini index equals \textbf{\Sexpr{round(foo.y1, 3)}} in \Sexpr{annee1} and \textbf{\Sexpr{round(foo.y2,3)}} in \Sexpr{annee2}. The Lorentz curves below show the distribution of output over the the industry for these years.\footnote{It shows for any \% of firms (x axis), what percentage  (y axis) of the total output they produce.}
+
+<<fig=TRUE,echo=false>>=
+
+Lorentz.y1 <- Lc(Mydata.y1$Y)
+Lorentz.y2 <- Lc(Mydata.y2$Y)
+plot(Lorentz.y1,col="darkred", lty = 1, lwd=4)
+lines(Lorentz.y2, col="blue", lty = 2, lw=2)
+legend("topleft",legend=c(paste("in",annee1), paste("in",annee2)),lty=1:2,col=c("darkred", "blue"))
+
+@
+
+
+
+\clearpage
 
 \section{Productivity \& efficency in \Sexpr{annee1} and \Sexpr{annee2} }
-\subsection{Partial productivity}
-<<echo=false,results=tex>>=
 
-# Creation de la table
-annee <-annee1
-# definition de l'??chantillon
-Tempdata <-subset(MyBigdata.trim, year== annee)
-
-#nrow(unique(subset(Mydata, Test0 >0 & year == 2008, select= c(carrier))))}}
-
-Mycap <- paste("Summary of partial productivity (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"unique airlines")
-Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
-Mylab <- "Monlabel"
-Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
-                                      "Y over K" = Tempdata$YoverK,
-                                      "Y over L" = Tempdata$YoverL,
-                                      "Y over E" = Tempdata$YoverE,
-                                      "Y over M" = Tempdata$YoverM
-                                  )                                                                                                                 )
-tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
-@
-
-<<echo=false,results=tex>>=
-annee = annee2
-Tempdata <-subset(MyBigdata.trim, year== annee)
-
-Mycap <- paste("Summary of partial productivity (year", annee,"), for",nrow(unique(subset(Tempdata,  select= c(carrier)))),"unique airlines")
-Mystats <-  list( "mean", "min", "median",  "max", "na", "n")
-Mylab <- "Monlabel"
-Myvars<- with(Tempdata, data.frame(#"Y in value " = round(Tempdata$Y/1000, 2),
-                                      "Y over K" = Tempdata$YoverK,
-                                      "Y over L" = Tempdata$YoverL,
-                                      "Y over E" = Tempdata$YoverE,
-                                      "Y over M" = Tempdata$YoverM
-                                  )                                                                                                                 )
-tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
-@
 \subsection{Can we consider that the technology is the same for ``big'' and ``small'' airlines in the industry}
 
 \textbf{Todo}
@@ -464,7 +500,7 @@ detach(Workdata)
 
 
 
-Calcul des scores relatifs à l'une ou l'autre des frontières : 
+Calcul des scores relatifs C  l'une ou l'autre des frontiC(res : 
 
 <<echo=FALSE, results=hide>>=
 ## Scores de chaque annee classique     
@@ -482,12 +518,12 @@ annee =2006
     xobs=matrix(c(dataobs$K),nrow=nobs,ncol=1) 
     yobs=matrix(c(dataobs$Y),nrow=nobs,ncol=1)
     
-# récupération des résultats Firmes big sur frontiere restreinte big
+# rC)cupC)ration des rC)sultats Firmes big sur frontiere restreinte big
     score.farell <- Benchmarking::dea(X=xobs, Y=yobs, RTS="vrs", ORIENTATION="out")
     score.big.big <-1/score.farell$eff
 
     
-# récupération des résultats Firmes big sur frontiere complete (avec toutes les firmes)  
+# rC)cupC)ration des rC)sultats Firmes big sur frontiere complete (avec toutes les firmes)  
     score.farell2 <- Benchmarking::dea(X=xobs, Y=yobs, XREF=xref, YREF=yref, RTS="vrs", ORIENTATION="out")
     score.big.all <-1/score.farell2$eff
    
@@ -676,7 +712,7 @@ nbtemp=length(x)
 score.dea.cont <- NA    # Score DEA 
 score.m.cont <- NA    # Score m
 score.alpha.cont <- NA    # Score alpha
-y.c <- NA               # années repliquées sur les observations
+y.c <- NA               # annC)es repliquC)es sur les observations
 
 
 for (i in 1:length(x)) {
@@ -688,21 +724,21 @@ for (i in 1:length(x)) {
     yref=matrix(c(dataref$Y),nrow=nref,ncol=1)
 
     
-# récupération du score DEA TOUTES  firmes sur frontiere contemporaine
+# rC)cupC)ration du score DEA TOUTES  firmes sur frontiere contemporaine
     score.farell <- Benchmarking::dea(X=xref, Y=yref, XREF=xref, YREF=yref, RTS="vrs", ORIENTATION="out")
     foo.c <-1/score.farell$eff
     score.dea.cont <- c(score.dea.cont,foo.c)  
     
-# récupération du m score  TOUTES  firmes sur frontiere contemporaine 
+# rC)cupC)ration du m score  TOUTES  firmes sur frontiere contemporaine 
     spam.c <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
     score.m.cont <- c(score.m.cont , spam.c$output) 
     
 #alpha-frontiere
-# récupération du m score  TOUTES  firmes sur frontiere contemporaine
+# rC)cupC)ration du m score  TOUTES  firmes sur frontiere contemporaine
     eggs.c <- alphascore(xref, yref, xeval=xref, yeval=yref,alpha=alpha)
     score.alpha.cont <- c(score.alpha.cont , eggs.c$output) 
 
-    #Definition des années  
+    #Definition des annC)es  
     spoof.c <- rep(x[i], nref)
     y.c <- c(y.c, spoof.c)
  }
@@ -734,11 +770,11 @@ nbtemp=length(x)
 score.dea.all <- NA    # Score DEA 
 score.m.all <- NA    # Score m
 score.alpha.all <- NA    # Score alpha
-y <- NA               # années rpliquées sur les observations
+y <- NA               # annC)es rpliquC)es sur les observations
 
 # Frontier defined for all years does not change  #
 
-dataref <- subset(Workdata)  # <- frontiere toutes années
+dataref <- subset(Workdata)  # <- frontiere toutes annC)es
 nref=nrow(dataref)
 xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
 yref=matrix(c(dataref$Y),nrow=nref,ncol=1)
@@ -750,21 +786,21 @@ for (i in 1:length(x)) {
     xobs=matrix(c(dataobs$K,dataobs$L,dataobs$E, dataobs$M),nrow=nobs,ncol=4)
     yobs=matrix(c(dataobs$Y),nrow=nobs,ncol=1)
     
-# récupération du score DEA TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
+# rC)cupC)ration du score DEA TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
     score.farell <- Benchmarking::dea(X=xobs, Y=yobs, XREF=xref, YREF=yref, RTS="vrs", ORIENTATION="out")
     foo <-1/score.farell$eff
     score.dea.all <- c(score.dea.all,foo)  
     
-# récupération du m score  TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
+# rC)cupC)ration du m score  TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
     spam <- ordermscore(xref, yref, xeval=xobs, yeval=yobs, m=M.order)
     score.m.all <- c(score.m.all,spam$output) 
     
 #alpha-frontiere
-# récupération du m score  TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
+# rC)cupC)ration du m score  TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
     eggs <- alphascore(xref, yref, xeval=xobs, yeval=yobs,alpha=alpha)
     score.alpha.all <- c(score.alpha.all,eggs$output) 
 
-    #Definition des années  
+    #Definition des annC)es  
     spoof <- rep(x[i], nobs)
     y <- c(y, spoof)
  }
@@ -789,38 +825,34 @@ abline(h = 1, col = "red",  lwd=2)
 
 @
 
-<< echo=FALSE, results=hide, fig=TRUE>>=
-qplot(y, score.dea.all, data=score.dea, geom=c("boxplot", "jitter"), 
-      fill=y, main="Airlines efficiency measured to pooled frontier",
-      ylab = "DEA-Efficiency (output oriented)", 
-      xlab = "Years ", outline =FALSE)
-      
-@
+% << echo=FALSE, results=hide, fig=TRUE>>=
+% qplot(y, score.dea.all, data=score.dea, geom=c("boxplot", "jitter"), 
+%       fill=y, main="Airlines efficiency measured to pooled frontier",
+%       ylab = "DEA-Efficiency (output oriented)", 
+%       xlab = "Years ", outline =FALSE)
+%       
+% @
 
-<<echo=FALSE, results=hide, fig=TRUE>>=
-library(ggplot2) 
-# Kernel density plots for Efficiency
-# grouped by number of year (indicated by color) : fill = y pour les années
+% <<echo=FALSE, results=hide, fig=TRUE>>=
+% # Kernel density plots for Efficiency
+% # grouped by number of year (indicated by color) : fill = y pour les annC)es
+% 
+% qplot(score.dea.all ,data=score.dea, geom="density", fill=y, alpha=I(.5), 
+%    main="Distribution of efficiencies over time", xlab="DEA-score efficiency relative to pooled frontier ", 
+%    ylab="Density")
+% 
+% @
 
-#score.dea$y <- as.factor(score.dea$y) 
-
-qplot(score.dea.all ,data=score.dea, geom="density", fill=y, alpha=I(.5), 
-   main="Distribution of efficiencies over time", xlab="DEA-score efficiency relative to pooled frontier ", 
-   ylab="Density")
-
-@
-
-<<echo=FALSE, results=hide, fig=TRUE>>=
-
-qplot(score.alpha.all ,data=score.alpha, geom="density", 
-      fill=y, 
-      alpha=I(.5), 
-      main="Distribution of efficiencies over time", 
-      xlab="Alpha-score efficiency  relative to pooled frontier ",
-      ylab="Density")
-
-@
-
+% <<echo=FALSE, results=hide, fig=TRUE>>=
+% 
+% qplot(score.alpha.all ,data=score.alpha, geom="density", 
+%       fill=y, 
+%       alpha=I(.5), 
+%       main="Distribution of efficiencies over time", 
+%       xlab="Alpha-score efficiency  relative to pooled frontier ",
+%       ylab="Density")
+% 
+% @
 
 
 << echo=FALSE, results=hide, fig=TRUE>>=
@@ -933,54 +965,53 @@ print(foo3)
 
 
 % Essai de graphique reliant les firmes par rang  
-<<echo=FALSE, results=hide, fig=TRUE >>=
-annee =2006
-# Calcul des efficacitis avec DEA, m-frontieres et alpha-frontieres 
-#DEA
-
-dataref.y1 <- subset(Workdata,year==annee )  # <- QU'Une année
-nref.y1=nrow(dataref.y1)
-
-xref=matrix(c(dataref.y1$K,dataref.y1$L,dataref.y1$M),nrow=nref.y1,ncol=3)
-yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
-
-spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
-dataref.y1$DEA <-round(1/eff(spam), 3)
-
-# M-frontier -  Scores output-oriented 
-spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
-dataref.y1$Mscore <- round(spam2$output, 3) 
-
-#alpha-frontiere
-foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
-dataref.y1$Ascore <-round(foo$output, 3)
-
-foo <- data.frame("Name" = dataref.y1$carriername, "Y"= dataref.y1$Y,  "DEA"= dataref.y1$DEA, "Mscore"= dataref.y1$Mscore, "Ascore"=dataref.y1$Ascore)
-
-#tri des données 
-foo <-  foo[with(foo, order(-DEA, -Y)), ]
-# Création des rankings DEA
-foo <-transform(foo,  dea.rank = rank(-DEA, ties.method = "first"))
-
-#tri des données 
-foo <-  foo[with(foo, order(-Mscore, -Y)), ]
-# Création des rankings Mscore
-foo <-transform(foo,  M.rank = rank(-Mscore, ties.method = "first"))
-
-#tri des données (on evite les ex-aequo)
-foo <-  foo[with(foo, order(-Ascore, -Y)), ]
-# Création des rankings Alpha
-foo <-transform(foo,  A.rank = rank(-Ascore, ties.method = "first"))
-
-
-res <- data.frame(foo[,6:8])
-
-p2 <- ggpcp(res,xlab="bgbg",ylab="byby")
-
-
-print(p2 + geom_line() + 
-        scale_y_continuous('Airlines ranking (DEA)', breaks=c(0,.5,1), labels=c("Last", "Median", "Best")))
-@
+% <<echo=FALSE, results=hide, fig=TRUE >>=
+% annee =2006
+% # Calcul des efficacitis avec DEA, m-frontieres et alpha-frontieres 
+% #DEA
+% 
+% dataref.y1 <- subset(Workdata,year==annee )  # <- QU'Une annC)e
+% nref.y1=nrow(dataref.y1)
+% 
+% xref=matrix(c(dataref.y1$K,dataref.y1$L,dataref.y1$M),nrow=nref.y1,ncol=3)
+% yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
+% 
+% spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
+% dataref.y1$DEA <-round(1/eff(spam), 3)
+% 
+% # M-frontier -  Scores output-oriented 
+% spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
+% dataref.y1$Mscore <- round(spam2$output, 3) 
+% 
+% #alpha-frontiere
+% foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
+% dataref.y1$Ascore <-round(foo$output, 3)
+% 
+% foo <- data.frame("Name" = dataref.y1$carriername, "Y"= dataref.y1$Y,  "DEA"= dataref.y1$DEA, "Mscore"= dataref.y1$Mscore, "Ascore"=dataref.y1$Ascore)
+% 
+% #tri des donnC)es 
+% foo <-  foo[with(foo, order(-DEA, -Y)), ]
+% # CrC)ation des rankings DEA
+% foo <-transform(foo,  dea.rank = rank(-DEA, ties.method = "first"))
+% 
+% #tri des donnC)es 
+% foo <-  foo[with(foo, order(-Mscore, -Y)), ]
+% # CrC)ation des rankings Mscore
+% foo <-transform(foo,  M.rank = rank(-Mscore, ties.method = "first"))
+% 
+% #tri des donnC)es (on evite les ex-aequo)
+% foo <-  foo[with(foo, order(-Ascore, -Y)), ]
+% # CrC)ation des rankings Alpha
+% foo <-transform(foo,  A.rank = rank(-Ascore, ties.method = "first"))
+% 
+% res <- data.frame(foo[,6:8])
+% #p2 <- ggpcp(res,xlab="bgbg",ylab="byby")
+% 
+%  print(p2 + geom_line() + 
+%          scale_y_continuous('Airlines ranking (DEA)',
+%                             breaks=c(0,.5,1), labels=c("Last", "Median", "Best")))
+% 
+% @
 
 %Essais en tous genres...
 
