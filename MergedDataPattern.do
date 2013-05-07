@@ -3,6 +3,8 @@
 /* 23/01/2013 	: Visualisation des missing par variable et par an   */
 /* 24/01/2013	: Definition of variables Y, K, L, E,  M (to discuss)     */
 /* 05/02/2012 	: Nouvelles définitions des inputs et des outputs (C +N ) */
+/* 29/03/2013	: Vérifiaction des variables, création de nouvelles listes (C+N)*/
+/* 29/03/2013 	: Création d'un fichier avec toutes les variables KLEM possibles  */ 
 
 
 /* Remove everything  */
@@ -96,20 +98,21 @@ gen Yincidental = or_othertot /priceindex
 gen Yrevenue = or_total/priceindex
 
 /* Capital */
-local Kvar "mtowkg oe_amortimobfgt KnonFlying KflyingExpenditure "
+local Kvar "mtowkg  KnonFlying KflyingExpenditure  oe_amortimobfgt oe_fgtequipinsu oe_fgtrentequip  oe_fgtequipmain oe_amortfgtequi "
 
 /* - Labor                                      */
-local Lvar "totalpersonnelendyearpersonnel  totalpersonneltotalexpenditure pilotsandcopilotstotalexpenditur  pilotsandcopilotsendyearpersonne"
+*local Lvar "totalpersonnelendyearpersonnel  totalpersonneltotalexpenditure pilotsandcopilotstotalexpenditur  pilotsandcopilotsendyearpersonne"
+local Lvar "totalpersonnelendyearpersonnel  totalpersonneltotalexpenditure "
 
 /* - Energy                                     */
 local Evar "fuelexp fuelprice fuelquantity"
 
 /* - Material                                    */
-local Mvar "MaterialExpenditure MaterialQuantity"
+local Mvar "MaterialExpenditure MaterialQuantity  oe_totoperatexp "
 
 /* - Output                                    */
-local Outvar " Ypax Yfreight Yincidental Yrevenue PaxRevenue  FreightRevenue  or_total or_othertot rpktotal rtktotal rpktotaldom rpktotalint rtktotaldom rtktotalint tkpaxtotal"
-
+*local Outvar " Ypax Yfreight Yincidental Yrevenue PaxRevenue  FreightRevenue  or_total or_othertot rpktotal rtktotal rpktotaldom rpktotalint rtktotaldom rtktotalint tkpaxtotal"
+local Outvar " Ypax Yfreight Yincidental Yrevenue  PaxRevenue FreightRevenue or_total or_othertot rpktotal rtktotal  tkpaxtotal"
 
 /* Liste de toutes les variables pertinentes */
 local KLEMYvar  "`Kvar' `Lvar' `Evar' `Mvar' `Outvar'"
@@ -149,6 +152,8 @@ outtable using Graphics/table2, mat(nonnul) replace
 /* CHOIX DES VARIABLES FINALES  */
 
 gen Y = Yrevenue
+/* Créé le 29/03/2013  YQ pas complet (CN)  */
+gen YQ = Ypax*(PaxRevenue/or_total) + Yfreight*(FreightRevenue/or_total) + Yincidental*(or_othertot/or_total) 
 gen K = mtowkg
 gen L = totalpersonnelendyearpersonnel
 gen E = fuelquantity
@@ -184,7 +189,7 @@ order Id carrier* year Y K L E M `KLEMYvar' country* Region Test0
 sort carrier year
 preserve  
 /* On garde un fichier complet pour "l'analyse des trous " Modifié le 30/03/2013 */
-keep Id carrier* year Y K L E M `KLEMYvar' country* Region Test0
+keep Id carrier* year Y YQ K L E M `KLEMYvar' country* Region Test0
 keep if year !=2010
 label data "File created by MergedDataPattern.do, many (slected) Y, KLEM"
 save   ../data/MultiYKLEM.dta, replace
