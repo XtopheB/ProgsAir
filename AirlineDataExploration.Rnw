@@ -4,6 +4,7 @@
 % 3/02/2013 : Integration of various statistics for 2 reference years. 
 %           : We decide to work with data for which Y, K, L & M are available i.e. test0>0 
 %05/02/2013 : Nouveau jeu de donn??es en entr??e et donc nouvelles sorties (pas de modif de code)
+% 09/05/2013 : Nouveaux graphiques et test de M et alphe...
 
 \documentclass[a4paper]{article}
 
@@ -39,8 +40,8 @@ rm(list=ls())
 
 ## Second change the working directory
 
-setwd("D:/progs/Air/progs")   
-#setwd("C:/Chris/zprogs/Air/progs")   
+#setwd("D:/progs/Air/progs")   
+setwd("C:/Chris/zprogs/Air/progs")   
 
 
 library(Hmisc)  #  <- Misc. statistiques descriptives  
@@ -790,6 +791,8 @@ score.fdh.cont$y.c <- as.factor(score.fdh.cont$y.c)
 score.m.cont$y.c <- as.factor(score.m.cont$y.c) 
 score.alpha.cont$y.c <- as.factor(score.alpha.cont$y.c) 
 
+colors <- rainbow(length(unique(Workdata$year))) 
+
 
 @
 
@@ -797,7 +800,8 @@ score.alpha.cont$y.c <- as.factor(score.alpha.cont$y.c)
 
 <<echo=FALSE, results=hide, fig=TRUE>>=
 boxplot(score.dea.cont[,2]~score.dea.cont[,1], 
-        main = "Airlines efficiency measured to contemporaneous DEA-frontier", 
+        main = "Airlines efficiency on contemporaneous DEA-frontier", 
+        col=colors, 
         sub = paste(" Computed on all available airlines (2002-2008)"),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
@@ -805,11 +809,13 @@ abline(h = 1, col = "red",  lwd=2)
 @
 
 << echo=FALSE, results=hide, fig=TRUE>>=
-p <- qplot(y.c, score.dea.cont, data=score.dea.cont, geom=c("boxplot"), 
-      fill=y.c, main="Airlines efficiency measured relative to contemporaneous DEA-frontier",
+p <- qplot(y.c, score.dea.cont, data=score.dea.cont, geom="boxplot", outlier=FALSE,
+      fill=y.c, main="Airlines efficiency on contemporaneous DEA-frontier",
       ylab = "DEA-Efficiency (output oriented)", 
       xlab = "Years ", outline =FALSE)
 p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
+
+
 p
 @
 
@@ -817,7 +823,8 @@ p
 
 <<echo=FALSE, results=hide, fig=TRUE>>=
 boxplot(score.fdh.cont[,2]~score.fdh.cont[,1], 
-        main = "Airlines efficiency measured to contemporaneous FDH-frontier", 
+        main = "Airlines efficiency on contemporaneous FDH-frontier", 
+        col=colors, 
         sub = paste(" Computed on all available airlines (2002-2008)"),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
@@ -838,16 +845,16 @@ p
 
 <<echo=FALSE, results=hide, fig=TRUE>>=
 boxplot(score.m.cont[,2]~score.m.cont[,1], 
-        main = "Airlines efficiency measured to contemporaneous order-m frontier", 
-        sub = paste(" Computed on all available airlines (2002-2008)"),  
-        ylab = "Efficiency (output oriented)", 
+        main = "Airlines efficiency on contemporaneous order-m frontier", 
+        col=colors, 
+        sub = paste(" Computed on all available airlines (2002-2008), m=", M.order,"."), 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
 @
 
 << echo=FALSE, results=hide, fig=TRUE>>=
 p<-qplot(y.c, score.m.cont, data=score.m.cont, geom=c("boxplot"), 
-      fill=y.c, main="Airlines efficiency measured relative to contemporaneous order-m frontier",
+      fill=y.c, main="Airlines efficiency on contemporaneous order-m frontier",
       ylab = "order-m Efficiency (output oriented)", 
       xlab = "Years ", outline =FALSE)
 p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
@@ -859,8 +866,9 @@ p
 
 <<echo=FALSE, results=hide, fig=TRUE>>=
 boxplot(score.alpha.cont[,2]~score.alpha.cont[,1], 
-        main = "Airlines efficiency measured to contemporaneous alpha frontier", 
-        sub = paste(" Computed on all available airlines (2002-2008)"),  
+        main = "Airlines efficiency on contemporaneous alpha frontier", 
+        col=colors, 
+        sub = paste(" Computed on all available airlines (2002-2008), alpha =",alpha,"."),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -868,7 +876,7 @@ abline(h = 1, col = "red",  lwd=2)
 
 << echo=FALSE, results=hide, fig=TRUE>>=
 p <- qplot(y.c, score.alpha.cont, data=score.alpha.cont, geom=c("boxplot"), 
-      fill=y.c, main="Airlines efficiency measured relative to contemporaneous alpha frontier",
+      fill=y.c, main="Airlines efficiency on contemporaneous alpha frontier",
       ylab = "alpha Efficiency (output oriented)", 
       xlab = "Years ", outline =FALSE)
 
@@ -953,8 +961,10 @@ score.alpha$y <- as.factor(score.alpha$y)
 % Graphs (Boxplots)  
 %%%%%%%      DEA
 <<echo=FALSE, results=hide, fig=TRUE>>=
+
 boxplot(score.dea[,2]~score.dea[,1], 
-        main = "Airlines efficiency measured to pooled DEA- frontier", 
+        main = "Airlines efficiency on DEA- frontier (Pooled Set)", 
+        col=colors, 
         sub = paste(" DEA frontier computed using ", nref, "airlines (2002-2008)"),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
@@ -978,7 +988,8 @@ p
 
 << echo=FALSE, results=hide, fig=TRUE>>=
 boxplot(score.fdh[,2]~score.fdh[,1], 
-        main = "Airlines efficiency  measured to pooled FDH frontier", 
+        col=colors, 
+        main = "Airlines efficiency  on FDH frontier (Pooled Set)", 
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -999,8 +1010,10 @@ p
 %%%%% M-order 
 
 << echo=FALSE, results=hide, fig=TRUE>>=
+
 boxplot(score.m[,2]~score.m[,1], 
-        main = "Airlines m-efficiency  measured to pooled order-m frontier", 
+        main = "Airlines efficiency on order-m frontier (Pooled Set)", 
+        col=colors, 
         sub = paste(" m-frontier computed on ", nref, "airlines (2002-2008), m=", M.order,"."),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
@@ -1023,7 +1036,8 @@ p
 <<echo=FALSE, results=hide, fig=TRUE>>=
 
 boxplot(score.alpha[,2]~score.alpha[,1], 
-        main = "Airlines alpha-efficiency measured to pooled frontier", 
+        main = "Airlines efficiency on alpha-frontier (Pooled Set)", 
+        col=colors, 
         sub = paste(" alpha-frontier computed on ", nref, "airlines (2002-2008), alpha=", alpha,"."),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
@@ -1097,21 +1111,20 @@ where $D^{CRS}_t(x,y)$ incorporates  the assumption of \textit{Constant} Return 
 
 
 % latex table generated in R 2.15.1 by xtable 1.7-1 package
-% Wed May 08 00:54:40 2013
+% Wed June 08 00:54:40 2013
 \begin{table}[ht]
 \centering
-\begin{tabular}{rrrrrrrr}
+\begin{tabular}{rrrrrrrrrrr}
   \hline
- & An1 & An2 & Malm & Pure Eff & Scale & Pure Tech & ScaleTech \\
+    year1 & year2 & Malm & Pure Eff & Scale & Pure Tech & ScaleTech & N & n1 & n2 \\
   \hline
-1 & 2002 & 2003 & 1.13 & 0.99 & 0.99 & 1.17 & 1.00 \\
-  2 & 2003 & 2004 & 1.27 & 0.96 & 0.90 & 1.31 & 1.12 \\
-  3 & 2004 & 2005 & 1.04 & 0.86 & 1.06 & 1.23 & 0.97 \\
-  4 & 2005 & 2006 & 1.11 & 1.23 & 1.08 & 0.96 & 0.94 \\
-  5 & 2006 & 2007 & 1.13 & 1.08 & 0.97 & 1.11 & 1.01 \\
-  6 & 2007 & 2008 & 1.30 & 0.96 & 0.98 & 1.06 & 1.01 \\
-  7 & 1900 & 1900 &  &  &  &  &  \\
-  8 & 2002 & 2008 & 1.85 & 1.03 & 0.95 & 1.96 & 1.01 \\
+   2002 & 2003 & 1.13 & 0.99 & 0.99 & 1.17 & 1.00 & 39 & 56 & 87 \\
+   2003 & 2004 & 1.27 & 0.96 & 0.90 & 1.31 & 1.12 & 57 & 87 & 71 \\
+   2004 & 2005 & 1.04 & 0.86 & 1.06 & 1.23 & 0.97 & 61 & 71 & 103 \\
+   2005 & 2006 & 1.11 & 1.23 & 1.08 & 0.96 & 0.94 & 59 & 103 & 68 \\
+   2006 & 2007 & 1.13 & 1.08 & 0.97 & 1.11 & 1.01 & 37 & 68 & 48 \\
+   2007 & 2008 & 1.30 & 0.96 & 0.98 & 1.06 & 1.01 & 27 & 48 & 46 \\ \hline
+   2002 & 2008 & 1.85 & 1.03 & 0.95 & 1.96 & 1.01 & 17 & 56 & 46 \\
    \hline
 \end{tabular}
 \caption{Malmquist indexes (average) decomposed following  SW(1998) et WW (1999) for a choice of successive years}
@@ -1120,60 +1133,60 @@ where $D^{CRS}_t(x,y)$ incorporates  the assumption of \textit{Constant} Return 
 
 
 
-
-<<echo=FALSE, results=hide>>=
-# definiton of elements 
-i1=seq(annee1, annee2-1, by=1)  # An 1
-i2=seq(annee1+1,annee2, by=1)   # An 2
-# ajout de 2 sequences qui nous interessent (et d'un saut par 00)
-i1<- c(i1, 1900,2002)
-i2 <-c(i2,1900, 2008)
-
-#---------------------------------------------
-## III: Calcul des indisces DE Malmqvuist(Simar-Wilson 1998 ; Wheelock-Wilson, 1999)
-table.malm.ww <-data.frame(toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0)) 
-
-for (k in 1:length(i1)) {
-    data1 <- subset(Workdata,year==i1[k])  # <-  annee 1
-    n1=nrow(data1)
-    data1.x=t(matrix(c(data1$K,data1$L,data1$M),nrow=n1,ncol=3))
-    data1.y=t(matrix(c(data1$Y),nrow=n1,ncol=1))
-    data1.id=t(matrix(c(data1$Id),nrow=n1,ncol=1))
-    
-    data2 <- subset(Workdata,year==i2[k])  # <-  annee 2
-    n2=nrow(data2)
-    data2.x=t(matrix(c(data2$K,data2$L,data2$M),nrow=n2,ncol=3))
-    data2.y=t(matrix(c(data2$Y),nrow=n2,ncol=1))
-    data2.id=t(matrix(c(data2$Id),nrow=n2,ncol=1))
-
-    #definition de la Table 
-    #estimation
-    malm.com <-FEAR::malmquist.components(X1=data1.x, Y1=data1.y, ID1=data1.id, 
-                                X2=data2.x, Y2=data2.y, ID2=data2.id, 
-                                ORIENTATION=2)
-    
-    malm.all <-FEAR::malmquist(LIST=malm.com)
-    # Decomposition fagon Fare et al...
-    spam <-cbind(i1[k],i2[k], 
-                 mean(malm.all$malm,na.rm = TRUE), 
-                 mean(malm.all$pure.eff,na.rm = TRUE),  
-                 mean(malm.all$scale,na.rm = TRUE), 
-                 mean(malm.all$pure.tech,na.rm = TRUE),
-                 mean(malm.all$scale.tech, na.rm = TRUE), 
-                 length(malm.all$scale.tech),
-                 n1, n2)
-    table.malm.ww <-rbind(table.malm.ww,spam)
-}  
-
-@ 
-
-<<echo =FALSE, results = tex>>=
-# mise en forme du tableau
-names(table.malm.ww) <- c("An1", "An2", "Malm", "Pure Eff", "Scale" , "Pure Tech" , "ScaleTech", "N","n1", "n2")
-foo3 <- xtable(table.malm.ww, label ="malmquistWW", caption = "Malmquist indexes (average) decompsed following  SW(1998) et WW (1999) for a choice of successive years")
-digits(foo3)[c(2,3,9,10)] <- 0
-print(foo3)
-@
+% 
+% <<echo=FALSE, results=hide>>=
+% # definiton of elements 
+% i1=seq(annee1, annee2-1, by=1)  # An 1
+% i2=seq(annee1+1,annee2, by=1)   # An 2
+% # ajout de 2 sequences qui nous interessent (et d'un saut par 00)
+% i1<- c(i1, 1900,2002)
+% i2 <-c(i2,1900, 2008)
+% 
+% #---------------------------------------------
+% ## III: Calcul des indisces DE Malmqvuist(Simar-Wilson 1998 ; Wheelock-Wilson, 1999)
+% table.malm.ww <-data.frame(toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0)) 
+% 
+% for (k in 1:length(i1)) {
+%     data1 <- subset(Workdata,year==i1[k])  # <-  annee 1
+%     n1=nrow(data1)
+%     data1.x=t(matrix(c(data1$K,data1$L,data1$M),nrow=n1,ncol=3))
+%     data1.y=t(matrix(c(data1$Y),nrow=n1,ncol=1))
+%     data1.id=t(matrix(c(data1$Id),nrow=n1,ncol=1))
+%     
+%     data2 <- subset(Workdata,year==i2[k])  # <-  annee 2
+%     n2=nrow(data2)
+%     data2.x=t(matrix(c(data2$K,data2$L,data2$M),nrow=n2,ncol=3))
+%     data2.y=t(matrix(c(data2$Y),nrow=n2,ncol=1))
+%     data2.id=t(matrix(c(data2$Id),nrow=n2,ncol=1))
+% 
+%     #definition de la Table 
+%     #estimation
+%     malm.com <-FEAR::malmquist.components(X1=data1.x, Y1=data1.y, ID1=data1.id, 
+%                                 X2=data2.x, Y2=data2.y, ID2=data2.id, 
+%                                 ORIENTATION=2)
+%     
+%     malm.all <-FEAR::malmquist(LIST=malm.com)
+%     # Decomposition fagon Fare et al...
+%     spam <-cbind(i1[k],i2[k], 
+%                  mean(malm.all$malm,na.rm = TRUE), 
+%                  mean(malm.all$pure.eff,na.rm = TRUE),  
+%                  mean(malm.all$scale,na.rm = TRUE), 
+%                  mean(malm.all$pure.tech,na.rm = TRUE),
+%                  mean(malm.all$scale.tech, na.rm = TRUE), 
+%                  length(malm.all$scale.tech),
+%                  n1, n2)
+%     table.malm.ww <-rbind(table.malm.ww,spam)
+% }  
+% 
+% @ 
+% 
+% <<echo =FALSE, results = tex>>=
+% # mise en forme du tableau
+% names(table.malm.ww) <- c("An1", "An2", "Malm", "Pure Eff", "Scale" , "Pure Tech" , "ScaleTech", "N","n1", "n2")
+% foo3 <- xtable(table.malm.ww, label ="malmquistWW", caption = "Malmquist indexes (average) decompsed following  SW(1998) et WW (1999) for a choice of successive years")
+% digits(foo3)[c(2,3,9,10)] <- 0
+% print(foo3)
+% @
 
 \clearpage
 
@@ -1308,7 +1321,7 @@ for (i in 1:length(x)) {
     score.farell <- Benchmarking::dea(X=xobs, Y=yobs, RTS="vrs", ORIENTATION="out")
     score.year.year <-1/score.farell$eff
     foo <- cbind(dataobs[,1:5], score.year.year)
-    score.DEA<- rbind(score.DEA, foo) # Rbind parce que pas le même nombre de firmes...
+    score.DEA<- rbind(score.DEA, foo) # Rbind parce que pas le mjme nombre de firmes...
     
     
     foo <- data.frame("Name" = score.DEA$carriername, 
