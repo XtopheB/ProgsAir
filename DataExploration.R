@@ -1,25 +1,18 @@
 # Created march 8, 2013 by christophe
 # Creation of an HTML dynamic file for data exploration 
+# 01/04/2013 : Customized for Steve and Nath
 
 ## D abord on efface tout silencieusement...
 rm(list=ls())
 
 ## Second change the working directory
 
-#setwd("D:/progs/Air/progs")   
-setwd("C:/Chris/zprogs/Air/progs")   
-
-#load the libraries
-library("googleVis")
-library("foreign")
+setwd("C:/Chris/zprogs/Air/progs/")   
 
 ## Partie I: Reading the data (All years) 
 # On prend le fichier ave tous les inputs et outputs 30/03 
 
-#fichier ="AllyearsKLEM.dta"
-fichier ="MultiYKLEM.dta"
-
-dataall <- read.dta(paste("../data/",fichier, sep=""))
+dataall <- read.dta(paste("../data/MultiYKLEM.dta")) # file is in ../data
 
 dim(dataall)
 Mydata <- data.frame(dataall)
@@ -33,27 +26,26 @@ Mydata$M <- Mydata$M/1000
 ### SUBSET of "BIG AIRLINES" + Selection on files with test0 != NA
 MyBigdata <-subset(Mydata, Y> quantile(Y, .75, na.rm = TRUE)  & Test0 > 0) 
 
-## Subset of airlines at least present once !!
-Workdata <-subset(Mydata, Test0 > 0)
+# ## Partie II; Install the libraries (To do ONLY ONCE !)
+#install.packages("googleVis")
+#install.packages("foreign")
 
-## Part 2 :  On crie l'objet ` visualiser 
+#load the libraries
+library("googleVis")
+library("foreign")
 
-#M <- gvisMotionChart(Workdata, idvar="carrier", timevar="year")
-M.big <- gvisMotionChart(MyBigdata, idvar="carrier", timevar="year",  xvar="K", yvar="Y", 
+## Part III :  On crie l'objet ?? visualiser 
+
+M.big <- gvisMotionChart(MyBigdata, idvar="carriername", timevar="year",  xvar="K", yvar="Y", 
                          colorvar="Region", sizevar="L", 
                          options=list(width=400, height=420))
 
-# la visualisation se fait dans le navigateur !!
-# Personalisation de la page
-M.big$html$caption = " Big Airline Database (MyBigData)"
-
-# Creation de la page 
+# Creation de la page,  la visualisation se fait dans le navigateur !!
 plot(M.big)
 
-# second graphique 
-# On crie une planisfhre 
-G.big<-gvisGeoChart(MyBigdata, "country", "Y",
-             options=list(width=220, height=150))
+
+# Second graphique 
+# On cr??e une planisph??re 
 
 G.big<-gvisGeoChart(MyBigdata, "country", "Y",
                     options=list(displayMode="Markers", 
@@ -65,13 +57,6 @@ plot(G.big)
 T.big <- gvisTable(MyBigdata,  options=list(page='enable', pageSize= 200))
 plot(T.big)
 
-#On combine carte et table
-GT <- gvisMerge(G.big,T.big, horizontal=FALSE)
-# On combine le tout
-MGT <- gvisMerge(GT, M.big,horizontal=TRUE, tableOptions="bgcolor=\"#CCCCCC\" cellspacing=10")
-# Traci Final 
-
-plot(MGT)
 
  
 
