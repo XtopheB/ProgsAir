@@ -1,0 +1,442 @@
+
+\documentclass[slidestop,compress,mathserif, handout]{beamer}
+%\usepackage[bars]{beamerthemetree} % Beamer theme v 2.2
+%\usetheme{Antibes} % Beamer theme v 3.0
+%\usetheme{Singapore}
+\usetheme{Dresden}
+\usecolortheme{seahorse}
+%%%% Langue
+%\usepackage[frenchb]{babel}
+\usepackage[english]{babel}
+%\usecolortheme[red] % Beamer color theme
+
+\setbeamertemplate{navigation symbols}{\insertframenumber /
+\inserttotalframenumber}
+\definecolor{vert}{rgb}{0.1,0.7,0.2}
+\definecolor{brique}{rgb}{0.7,0.16,0.16}
+\definecolor{gris}{rgb}{0.2,0.4,0.3}
+
+
+
+\title{Productivity and Efficiency of World Airlines:\\
+An Empirical Application with order-m and $\alpha$-Frontiers}
+%\title{Technical \& Efficiency Change in the French Food Industries}
+\author[Bontemps \textit{et al.} (2012)]{Christophe Bontemps$^1$ , Steve Lawford$^2$, and Nathalie Lenoir$^2$}
+\institute{(1) Toulouse School of Economics and (2) French Civil Aviation University, Toulouse}
+
+\logo{\includegraphics[height=0.5cm]{Graphics/LogoTSE.jpg}}  % <------------------ A remettre
+\date{\textbf{EWEPA}, Helsinki, \textit{ June 2013}}
+
+
+
+\begin{document}
+\frame{\titlepage}
+
+%\frame{{\color{blue} \large ROADMAP} \tableofcontents}
+
+\section{Introduction}
+
+
+\subsection{Empirical (and preliminary) paper}
+\frame[t] {
+\begin{itemize}[<+->]
+  \item Questions addressed in this (preliminary) paper:
+  \bigskip
+  \begin{enumerate}
+    \item What are the features of this industry efficiency at a world level ?
+    \item Which are the most efficient airlines ?
+    \item Do we observe technical change over time?
+    \item Is the ranking of airlines evolving over time ?
+    \item Are majors more efficient than low cost carriers (LCC) ?
+  \end{enumerate}
+  \bigskip
+  \item {Questions \color{brique}{not yet} addressed:}
+  \bigskip
+  \begin{enumerate}
+    \item Did the fuel efficiency of airline improve over time ?
+    \item Did labour efficiency improve over time ?
+    \item Is competition affecting productivity  ? i.e. Are the airlines who operate on routes with more competitors more efficient
+    \item Do airlines involved in an alliance have a higher productivity ?
+  \end{enumerate}
+\end{itemize}
+}
+
+\subsection{Why using order-m or $\alpha$-frontiers ?}
+\frame[t] {
+ \vspace{1cm}
+
+ Why using order-m or $\alpha$-frontiers ?
+
+\begin{itemize}[<+->]
+  \item These methods could be used to detect (and then remove) influential firms or ``outliers'' (Simar, 2003).
+  \item We want to keep those firms in the analysis !
+  \item order-m scores have an economic (and local) interpretation :
+  \item[]$\rightarrow$ it is the "\emph{expected minimal value  of input achievable among m firms drawn from the population of firms producing at least this level of output}" (input-oriented case) (Cazals, Florens and Simar, 2002).
+  \item Could be ``fun'' to use  and to compare with other methods on real data.
+\end{itemize}
+}
+
+\section{Airlines industry and Data}
+ \frame[t] {
+  \vspace{1cm}
+\begin{itemize}
+%The processed food and beverage industry is Australia’s largest manufacturing industry with a turnover of more than $71.4 billion in 2005–06.
+  \item Airline industry (world level)
+  \item Original dataset collection (still in progress!) the "\textit{ENAC Air Transport Data}" collecting information on world airlines since  1995 (from IATA, ICAO and other sources).
+  \item Previous study used country level data: 
+  \begin{itemize}
+      \item UK (Assaf 2011);
+      \item USA (Kumbhakar 1992, Oum \textit{et al.} 2005, F\"{a}re, Grosskopf \& Sickles 2007) or
+      \item UK \textit{vs} USA (Assaf \& Josiassen 2012), 
+  \end{itemize}
+  \item   while 
+  \begin{itemize}
+       \item the market is global for (some?) inputs/output, 
+       \item competion is gloabl and 
+       \item no cross country study has been done yet.
+    \end{itemize}    
+\end{itemize}
+}
+
+
+\subsection{Data}
+ \frame[t] {
+  \vspace{1cm}
+  Data
+\begin{itemize}
+  \item (so far) We have 1 output $Y$ and 4 inputs ($K$, $L$, $E$, $M$)
+  \item $Y$ is the sum of RPKs (revenue-passenger kilometers), RTKs (Revenue tonne-kilometre), and incidental revenues (transformed in quantities) in Pax $\times$ Km
+  \item $K$ is the Flying capital defined as the total fleet max take-off weight (in kg).
+  \item $L$ is the total personnel (permanent + non-permanent) in pers.x month
+  \item $E$ is the total fuel quantity (in Gallons)
+  \item $M$ are other operating expediture/price index.
+
+\end{itemize}
+}
+
+\section{Efficiency over time}
+
+ \frame[t] {
+  \vspace{1cm}
+Visualizing data over time is difficult
+\begin{itemize}
+  \item Let's try with R-googleVis
+\end{itemize}
+}
+
+\frame[t] {
+  \vspace{1cm}
+Efficiency over time : 3 questions
+\begin{itemize}[<+->]
+  \item How to measure efficiency  ?
+  \item[] $\rightarrow$ Using distance towards a frontier (possibly an order-m or $\alpha$-frontier)
+  \item How to visualize/measure changes over time ?
+  \item[] $\rightarrow$ Question addressed in this paper
+  \item How to disentangle the effects of technical change vs productivity changes ?
+  \item[] $\rightarrow$ Using decomposition of productivity index (Simar-Wilson 98, Wheelock Wilson,  1999 or  Färe, Grosskopft \& Sickles 2007))
+
+\end{itemize}
+}
+
+\subsection{"Static" Measure of efficiency using Frontiers}
+\frame[t] {
+\begin{itemize}[<+->]
+   %\item \textbf{Technical efficiency scores} $\rightarrow$ {\color{brique} Production possibilities set}
+    \item We observe firms inputs and outputs  $(X_{i},Y_{i})$ \textbf{for a given year}.
+    \item The production set is defined simply as:
+    \begin{equation*}
+        \Psi=\left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\}
+    \end{equation*}
+    \item Nonparametric data envelopment techniques used to estimate this set. For example, DEA.
+    \begin{equation*}
+        \widehat{\Psi}_{DEA} = \left\{ \left( x,y\right) |  \;y\leq \sum_{i =1}^n \gamma_{i} Y_{i},x\geq \sum_{i =1}^n  \gamma_{i} X_{i}, \gamma_{i }\geq 0 ; \sum_{i =1}^n \gamma_{i} =1 \right\}
+        \end{equation*}
+    \item The estimated DEA (output oriented) efficiency score of a firm $(x_0, y_0)$ is given by :
+    \begin{equation*}
+        \widehat{\Lambda}_{DEA} = sup \left\{\lambda \;| \; (x_0, \lambda y_0) \in \widehat{\Psi}_{DEA}\right\}
+    \end{equation*}
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+  \item Illustration, one input, one output
+  \begin{figure}[t]
+    \includegraphics[width=0.6\textwidth]{Graphics/Points.pdf}
+  \end{figure}
+  \item[]
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+  \item Illustration, DEA Frontier
+  \begin{figure}[t]
+   \includegraphics[width=0.6\textwidth]{Graphics/PointsDEA.pdf}
+  \end{figure}
+  \item DEA efficiency score is measured as the vertical distance to the frontier
+\end{itemize}
+}
+
+
+\subsection{How to measure technical change over time ?}
+%(Tulkens and Van den Eeckaut, 1995)
+\frame[t] {
+Here, we  observe firms inputs and outputs  $(X_{it},Y_{it})$ \textbf{over the period} $t=1,\cdots,T$.
+\bigskip
+\begin{itemize}
+    \item We have several {\color{brique} contemporaneous} production possibilities set:
+    \begin{equation*}
+        \Psi_{t}^{cont}=\left\{ \left( x,y\right) |\;y\leq \sum_{i \in S(t)}\;\gamma_{it} Y_{it},\;x\geq \sum_{i \in S(t)}\;\gamma_{it} X_{it} ; \gamma_{i\tau }\geq 0\right\} .
+    \end{equation*}
+    \item $S(\tau)$ is the set of firms operating at time $\tau$
+    \end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+  \item Illustration :  Production set time t=1
+  \begin{figure}[t]
+    \includegraphics[width=0.8\textwidth]{Graphics/ProgY1.pdf}
+  \end{figure}
+  \item[]
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+  \item Illustration : DEA Frontier, time t=1
+  \begin{figure}[t]
+   \includegraphics[width=0.8\textwidth]{Graphics/ProgY1F.pdf}
+  \end{figure}
+  \item DEA efficiency score date 2 =  distance to the frontier
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+  \item Illustration :  Production set time t=2
+  \begin{figure}[t]
+    \includegraphics[width=0.8\textwidth]{Graphics/ProgY2.pdf}
+  \end{figure}
+  \item[]
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+  \item Illustration : DEA Frontier, time t=2
+  \begin{figure}[t]
+   \includegraphics[width=0.8\textwidth]{Graphics/ProgY2F.pdf}
+  \end{figure}
+  \item DEA efficiency score date 2 =  distance to the frontier
+\end{itemize}
+}
+
+
+\frame[t] {
+Questions:
+\begin{itemize}
+    \item Frontier shifts are interesting (technical progress)  and cannot be ``seen'' if more than one input.
+    \item Frontiers could be affected by `` outliers'' $\rightarrow$ Could use a more robust frontier estimator
+    \item  Scores at date 1 and date 2 not comparable (holes ?? in the dataset, changes in the production frontier)
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+    \item Efficiency scores of airlines on contemporaneous DEA frontiers
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-028.pdf}
+    \end{figure}
+  \item
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+    \item Efficiency scores of airlines  on contemporaneous order-m frontiers 
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-032.pdf}
+    \end{figure}
+  \item[]
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+        \item Efficiency scores of airlines  on contemporaneous $\alpha$-frontiers
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-034.pdf}
+    \end{figure}
+  \item[]
+\end{itemize}
+}
+
+\section{Basic idea 1 }
+\frame[t] {
+We propose to compute the all-time empirical production set (ATPS) as the union of all the production sets $t=1, \cdots, T$ :
+   \bigskip
+\begin{itemize}[<+->]
+\item[]
+\begin{eqnarray*}
+\Psi^{ATPS} =   \bigcup_{t=1}^{T} \Psi_{t}^{cont}
+\end{eqnarray*}
+
+\item[] {\footnotesize $S(\tau)$ is the set of firms operating at time $\tau$ }
+{\footnotesize
+\begin{eqnarray*}
+\Psi^{ATPS} =  \bigcup_{t=1}^{T} \left\{ \left( x,y\right) |\;y\leq \sum_{i \in S(t)}\;\gamma_{it} Y_{it},\;x\geq \sum_{i \in S(t)}\;\gamma_{it} X_{it} ; \gamma_{i\tau }\geq 0\right\} .
+\end{eqnarray*}
+}
+\item[] or
+{\footnotesize
+\begin{eqnarray*}
+\Psi^{ATPS} =  \left\{ \left(x,y\right) | \; y \leq {\color{blue} {\sum_{\tau = 1}^{T}}} \sum_{j \in S(\tau)} z_{j\tau} Y_{j\tau} ,
+ x \geq {\color{blue}\sum_{\tau = 1}^{T} } \sum_{j \in S(\tau)}  z_{j\tau} X_{j\tau} ,   \mbox{all} \; z_{j\tau} \geq 0 \right\}.
+\end{eqnarray*}
+}
+\end{itemize}
+}
+
+\frame[t] {
+\begin{center}
+{\color{brique} $ \Psi_{1}^{cont} $}
+\end{center}
+
+\begin{figure}[t]
+\includegraphics[width=0.7\textwidth]{Graphics/PY1.pdf}
+\end{figure}
+}
+
+
+\frame[t] {
+\begin{center}
+{\color{blue} $ \Psi^{ATPS} $}
+\end{center}
+\begin{figure}[t]
+\includegraphics[width=0.7\textwidth]{Graphics/PY1Y2.pdf}
+\end{figure}
+}
+
+
+
+
+\subsection{How to measure technical change over time ?}
+\frame[t] {
+Computing firms efficiency score relative to that frontier
+\begin{itemize}
+    \item The  $\Psi^{ATPS}$ production set  does not move over time.
+    \item Computing firms efficiency each year gives a visualisation of the efficiency changes over time.
+    \item Instead of using the DEA frontier on the $\Psi^{ATPS}$ frontier we use the order-m or $\alpha$ frontier.
+\end{itemize}
+}
+
+
+\frame[t] {
+\begin{itemize}
+    \item Efficiency scores of airlines on $\Psi^{ATPS}$  DEA frontiers
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-037.pdf}
+    \end{figure}
+  \item
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+    \item Efficiency scores of airlines  on $\Psi^{ATPS}$ order-m frontiers
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-041.pdf}
+    \end{figure}
+  \item[]
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+        \item Efficiency scores of airlines  on $\Psi^{ATPS}$ $\alpha$-frontiers
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-043.pdf}
+    \end{figure}
+  \item[]
+\end{itemize}
+}
+
+
+\subsection{Results ?}
+\frame[t] {
+Computing firms efficiency score relative to that frontier
+\begin{itemize}
+    \item The efficiency of firms increase year after years
+    \item Computing order-m or $\alpha$ frontier gives the same d=feature, but with some changes in the details (see year 2008) 
+    \item Some evidence on technical progress ( \textit{i.e.} shift upwards of the frontier)
+    \end{itemize}
+}
+
+
+% Sur le graphique, on a l'impression que la productivité baisse en 2008 (version DEA) et pas sur order-m (à voir)
+\section{Basic idea 2 }
+
+
+%\subsection{Stage 2: Decomposition of productivity change}
+\frame[t] {
+For each subperiod $[t_1, t_2]$, we compute the Malmquist Index (MI) on a balanced panel using
+ $(X_i, Y_i)_{t=t_1;t_2}$. We decompose MI into different elements following Simar and Wilson (1999).
+{\footnotesize
+\begin{eqnarray*}
+MI &=& \mbox{Pure efficiency change} \times \mbox{Change in the scale
+efficiency} \\
+& \times & \mbox{Pure change in technology} \\
+& \times & \mbox{Change in the scale of the technology}
+\end{eqnarray*}
+
+\begin{eqnarray}
+MI&=& \left(\frac{D^{VRS}_\mathbf{t_2}(x_\mathbf{t_2}, y_\mathbf{t_2})}{D^{VRS}_%
+\mathbf{t_1}(x_\mathbf{t_1}, y_\mathbf{t_1})}\right) \times \left(\frac{{D^{CRS}_%
+\mathbf{t_2}(x_\mathbf{t_2}, y_\mathbf{t_2})} \;/\; {D^{VRS}_\mathbf{t_2}(x_\mathbf{c%
+}, y_\mathbf{t_2})}}{{D^{CRS}_\mathbf{t_1}(x_\mathbf{t_1}, y_\mathbf{t_1})} \;/\; {%
+D^{VRS}_\mathbf{t_1}(x_\mathbf{t_1}, y_\mathbf{t_1})}}\right)  \notag \\
+& \times& \left(\frac{D^{VRS}_\mathbf{t_1}(x_\mathbf{t_2}, y_\mathbf{t_2})}{%
+D^{VRS}_\mathbf{t_2}(x_\mathbf{t_2}, y_\mathbf{t_2})} \times \frac{D^{VRS}_\mathbf{%
+t_1}(x_\mathbf{t_1}, y_\mathbf{t_1})}{D^{VRS}_\mathbf{t_2}(x_\mathbf{t_1}, y_\mathbf{t_1}%
+)} \right)^{0.5}  \notag \\
+& \times& \left( \frac{D^{CRS}_\mathbf{t_1}(x_\mathbf{t_2}, y_\mathbf{t_2}) \;/\;
+D^{VRS}_\mathbf{t_1}(x_\mathbf{t_2}, y_\mathbf{t_2})} {D^{CRS}_\mathbf{t_2}(x_%
+\mathbf{t_2}, y_\mathbf{t_2})\;/\; D^{VRS}_\mathbf{t_2}(x_\mathbf{t_2}, y_\mathbf{t_2})%
+} \times \frac{D^{CRS}_\mathbf{t_1}(x_\mathbf{t_1}, y_\mathbf{t_1})\;/\;D^{VRS}_%
+\mathbf{t_1}(x_\mathbf{t_1}, y_\mathbf{t_1})} {D^{CRS}_\mathbf{t_2}(x_\mathbf{t_1}, y_%
+\mathbf{t_1}) \;/\; D^{VRS}_\mathbf{t_2}(x_\mathbf{t_1}, y_\mathbf{t_1})}
+\right)^{0.5}
+\end{eqnarray}}
+}
+
+
+\frame[t] {
+Malmquist decomposition on our sample for several subperiods (Simar Wilson 1998,  Wheelock Wilson 1999)
+\bigskip
+{\footnotesize
+\begin{tabular}{rrrrrrrrrrr}
+  \hline
+    year1 & year2 & Malm & Pure Eff & Scale & Pure Tech & ScaleTech & N & n1 & n2 \\
+  \hline
+   2002 & 2003 & 1.13 & 0.99 & 0.99 & 1.17 & 1.00 & 39 & 56 & 87 \\
+   2003 & 2004 & 1.27 & 0.96 & 0.90 & 1.31 & 1.12 & 57 & 87 & 71 \\
+   2004 & 2005 & 1.04 & 0.86 & 1.06 & 1.23 & 0.97 & 61 & 71 & 103 \\
+   2005 & 2006 & 1.11 & 1.23 & 1.08 & 0.96 & 0.94 & 59 & 103 & 68 \\
+   2006 & 2007 & 1.13 & 1.08 & 0.97 & 1.11 & 1.01 & 37 & 68 & 48 \\
+   2007 & 2008 & 1.30 & 0.96 & 0.98 & 1.06 & 1.01 & 27 & 48 & 46 \\ \hline
+   2002 & 2008 & 1.85 & 1.03 & 0.95 & 1.96 & 1.01 & 17 & 56 & 46 \\
+   \hline
+\end{tabular}
+}
+
+}
+
+
+
+
+\end{document}
+
+
+
