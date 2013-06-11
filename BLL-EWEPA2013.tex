@@ -36,7 +36,6 @@ An Empirical Application with order-m and $\alpha$-Frontiers}
 
 \section{Introduction}
 
-
 \subsection{Empirical (and preliminary) paper}
 \frame[t] {
 \begin{itemize}[<+->]
@@ -69,12 +68,78 @@ An Empirical Application with order-m and $\alpha$-Frontiers}
 
 \begin{itemize}[<+->]
   \item These methods could be used to detect (and then remove) influential firms or ``outliers'' (Simar, 2003).
-  \item We want to keep those firms in the analysis !
+  \item[$\rightarrow$] We want to keep those firms in the analysis !
   \item order-m scores have an economic (and local) interpretation :
-  \item[]$\rightarrow$ it is the "\emph{expected minimal value  of input achievable among m firms drawn from the population of firms producing at least this level of output}" (input-oriented case) (Cazals, Florens and Simar, 2002).
+  \item[]$\rightarrow$ it is (input-oriented case)  the ``\emph{expected minimal value  of input achievable among m firms drawn from the population of firms producing at least this level of output}'' (Cazals, Florens and Simar, 2002).
+      
+ % \item[]$\rightarrow$ it is (output-oriented case) the  ``\emph{expected maximum value of output among m firms drawn from the population of firms using less than this level of inputs}''
+
   \item Could be ``fun'' to use  and to compare with other methods on real data.
+  
 \end{itemize}
 }
+
+\subsection{More precise definition of order-m or $\alpha$-frontiers ?}
+\frame[t] {
+\begin{itemize}[<+->]
+  \item[]The production set is defined simply as:
+\begin{eqnarray*}
+        \Psi            &=& \left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\} \\
+  \end{eqnarray*}
+  \item[] Can be approximated by several Sets :
+\begin{eqnarray*}      
+\widehat{\Psi}_{FDH}    &=& \left\{ \left( x,y\right) | y \leq Y_i ,\;  x \geq X_i, \; i=1, \cdots n \right\} \\
+ \widehat{\Psi}_{DEA}    &=& \left\{ \left( x,y\right) |  \;y\leq \sum_{i =1}^n \gamma_{i} Y_{i},x\geq \sum_{i =1}^n  \gamma_{i} X_{i}, \gamma_{i }\geq 0 ; \sum_{i =1}^n \gamma_{i} =1 \right\} \\
+  \Psi_m (x)            &=& E \left [ max(Y^1, \cdots, Y^m) | X  \leq x   \right ] \\
+\end{eqnarray*}
+\end{itemize}
+}
+
+\subsection{A different way of defining efficiency scores) }
+
+\frame[t] {
+\begin{itemize}[<+->]
+ \item   For any $(x,y) \in \Psi$   $\Psi = \left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\}$
+ \item $\Psi$ is also the support of $H_{X,Y}(x,y)= Prob( X  \leq x , Y \geq y)$ which can be interpreted as the probability for a firm operating at level (x,y) to be dominated.
+  \item Note that :
+  \begin{eqnarray*}
+   H_{X,Y}(x,y) &=& Prob( X  \leq x | Y \geq y) Prob(Y \geq y )  = F_c(x|y)S_Y(y) \\
+                 &=& Prob(Y \geq y | X  \leq x ) Prob(X  \leq x )  = S_c(y|x)F_X(x) \\
+   \end{eqnarray*}
+   The support of $F_c(x|y)$
+\end{itemize}
+}
+
+
+\frame[t] {
+\begin{itemize}[<+->]
+ \item  The production set is defined simply as:  $\Psi = \left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\}$
+ \item $\Psi$ is also the support of $H_{X,Y}(x,y)= Prob( X  \leq x , Y \geq y)$ which can be interpreted as the probability for a firm operating at level (x,y) to be dominated.
+  \item Note that :
+  \begin{eqnarray*}
+   H_{X,Y}(x,y) &=& Prob( X  \leq x | Y \geq y) Prob(Y \geq y )  = F_c(x|y)S_Y(y) \\
+                 &=& Prob(Y \geq y | X  \leq x ) Prob(X  \leq x )  = S_c(y|x)F_X(x) \\
+   \end{eqnarray*}
+   The support of $F_c(x|y)$
+\end{itemize}
+}
+
+
+\frame[t] {
+\begin{itemize}[<+->]
+  \item[order-m] The production set can be described in terms of its sections. $ \forall x$, the frontier in the output direction $\Psi(x) = \{ y | (x,y) \in \Psi \}$. It is also the upper boundary of the support of $F_c(y|x)$. 
+\begin{eqnarray*}
+ \Psi(x)            &=& sup \left\{ y | F_c(y|x) < 1 \right\} \\
+\end{eqnarray*}
+\item  $\Psi(x)$ is the maximum level of output attainable for any firm using less than the level $x$ of input.
+\item given a fixed integer $m$,  for a given level of input $x$, the  order-m frontier in the output direction $\Psi_m(x)$ is:
+\begin{eqnarray*}
+ \Psi_m (x)            &=& E \left [ max(Y^1, \cdots, Y^m) | X  \leq x   \right ] \\
+\end{eqnarray*}
+\item it is the expected maximum value of m random variables $Y^1, \cdots, Y^m$  of m firms drawn from the population of firms using using less than the level $x$ of input.
+\end{itemize}
+}
+
 
 \section{Airlines industry and Data}
  \frame[t] {
@@ -83,18 +148,18 @@ An Empirical Application with order-m and $\alpha$-Frontiers}
 %The processed food and beverage industry is Australia’s largest manufacturing industry with a turnover of more than $71.4 billion in 2005–06.
   \item Airline industry (world level)
   \item Original dataset collection (still in progress!) the "\textit{ENAC Air Transport Data}" collecting information on world airlines since  1995 (from IATA, ICAO and other sources).
-  \item Previous study used country level data: 
+  \item Previous study used country level data:
   \begin{itemize}
       \item UK (Assaf 2011);
       \item USA (Kumbhakar 1992, Oum \textit{et al.} 2005, F\"{a}re, Grosskopf \& Sickles 2007) or
-      \item UK \textit{vs} USA (Assaf \& Josiassen 2012), 
+      \item UK \textit{vs} USA (Assaf \& Josiassen 2012),
   \end{itemize}
-  \item   while 
+  \item   while
   \begin{itemize}
-       \item the market is global for (some?) inputs/output, 
-       \item competion is gloabl and 
+       \item the market is global for (some?) inputs/output,
+       \item competion is gloabl and
        \item no cross country study has been done yet.
-    \end{itemize}    
+    \end{itemize}
 \end{itemize}
 }
 
@@ -114,8 +179,10 @@ An Empirical Application with order-m and $\alpha$-Frontiers}
 \end{itemize}
 }
 
-\section{Efficiency over time}
 
+
+
+\section{Efficiency over time}
  \frame[t] {
   \vspace{1cm}
 Visualizing data over time is difficult
@@ -147,7 +214,7 @@ Efficiency over time : 3 questions
     \begin{equation*}
         \Psi=\left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\}
     \end{equation*}
-    \item Nonparametric data envelopment techniques used to estimate this set. For example, DEA.
+    \item Nonparametric data envelopment techniques are used to estimate this set. For example, DEA.
     \begin{equation*}
         \widehat{\Psi}_{DEA} = \left\{ \left( x,y\right) |  \;y\leq \sum_{i =1}^n \gamma_{i} Y_{i},x\geq \sum_{i =1}^n  \gamma_{i} X_{i}, \gamma_{i }\geq 0 ; \sum_{i =1}^n \gamma_{i} =1 \right\}
         \end{equation*}
@@ -252,27 +319,27 @@ Questions:
   \item
 \end{itemize}
 }
-
-\frame[t] {
-\begin{itemize}
-    \item Efficiency scores of airlines  on contemporaneous order-m frontiers 
-    \begin{figure}[t]
-        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-032.pdf}
-    \end{figure}
-  \item[]
-\end{itemize}
-}
-
-\frame[t] {
-\begin{itemize}
-        \item Efficiency scores of airlines  on contemporaneous $\alpha$-frontiers
-    \begin{figure}[t]
-        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-034.pdf}
-    \end{figure}
-  \item[]
-\end{itemize}
-}
-
+%
+%\frame[t] {
+%\begin{itemize}
+%    \item Efficiency scores of airlines  on contemporaneous order-m frontiers
+%    \begin{figure}[t]
+%        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-032.pdf}
+%    \end{figure}
+%  \item[]
+%\end{itemize}
+%}
+%
+%\frame[t] {
+%\begin{itemize}
+%        \item Efficiency scores of airlines  on contemporaneous $\alpha$-frontiers
+%    \begin{figure}[t]
+%        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-034.pdf}
+%    \end{figure}
+%  \item[]
+%\end{itemize}
+%}
+%
 \section{Basic idea 1 }
 \frame[t] {
 We propose to compute the all-time empirical production set (ATPS) as the union of all the production sets $t=1, \cdots, T$ :
@@ -321,7 +388,6 @@ We propose to compute the all-time empirical production set (ATPS) as the union 
 
 
 
-
 \subsection{How to measure technical change over time ?}
 \frame[t] {
 Computing firms efficiency score relative to that frontier
@@ -343,33 +409,32 @@ Computing firms efficiency score relative to that frontier
 \end{itemize}
 }
 
-\frame[t] {
-\begin{itemize}
-    \item Efficiency scores of airlines  on $\Psi^{ATPS}$ order-m frontiers
-    \begin{figure}[t]
-        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-041.pdf}
-    \end{figure}
-  \item[]
-\end{itemize}
-}
-
-\frame[t] {
-\begin{itemize}
-        \item Efficiency scores of airlines  on $\Psi^{ATPS}$ $\alpha$-frontiers
-    \begin{figure}[t]
-        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-043.pdf}
-    \end{figure}
-  \item[]
-\end{itemize}
-}
-
+%\frame[t] {
+%\begin{itemize}
+%    \item Efficiency scores of airlines  on $\Psi^{ATPS}$ order-m frontiers
+%    \begin{figure}[t]
+%        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-041.pdf}
+%    \end{figure}
+%  \item[]
+%\end{itemize}
+%}
+%
+%\frame[t] {
+%\begin{itemize}
+%        \item Efficiency scores of airlines  on $\Psi^{ATPS}$ $\alpha$-frontiers
+%    \begin{figure}[t]
+%        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-043.pdf}
+%    \end{figure}
+%  \item[]
+%\end{itemize}
+%}
 
 \subsection{Results ?}
 \frame[t] {
 Computing firms efficiency score relative to that frontier
 \begin{itemize}
     \item The efficiency of firms increase year after years
-    \item Computing order-m or $\alpha$ frontier gives the same d=feature, but with some changes in the details (see year 2008) 
+    \item Computing order-m or $\alpha$ frontier gives the same d=feature, but with some changes in the details (see year 2008)
     \item Some evidence on technical progress ( \textit{i.e.} shift upwards of the frontier)
     \end{itemize}
 }
@@ -432,6 +497,7 @@ Malmquist decomposition on our sample for several subperiods (Simar Wilson 1998,
 }
 
 }
+
 
 
 
