@@ -4,7 +4,6 @@
 % 3/02/2013 : Integration of various statistics for 2 reference years. 
 %           : We decide to work with data for which Y, K, L & M are available i.e. test0>0 
 %05/02/2013 : Nouveau jeu de donn??es en entr??e et donc nouvelles sorties (pas de modif de code)
-% 09/05/2013 : Nouveaux graphiques et test de M et alphe...
 
 \documentclass[a4paper]{article}
 
@@ -40,8 +39,8 @@ rm(list=ls())
 
 ## Second change the working directory
 
-#setwd("D:/progs/Air/progs")   
-setwd("C:/Chris/zprogs/Air/progs")   
+setwd("D:/progs/Air/progs")   
+#setwd("C:/Chris/zprogs/Air/progs")   
 
 
 library(Hmisc)  #  <- Misc. statistiques descriptives  
@@ -95,12 +94,12 @@ Workdata <-subset(Mydata, Test0 > 0)   #<<<< ---- Workdata = tout l'echantillon 
 attach(Workdata)
 # Definition of the period under scrutiny
 annee1=2002
-annee2=2008
+annee2=2005
 
 # Parameters 
-M.order<-50
+M.order<-30
 M.rep <-200
-alpha <- 0.95
+alpha <- 0.985
 
 @
 
@@ -559,7 +558,7 @@ We'd like to do the same with m-frontiers but do not have enough points at this 
 
 \subsection{DEA, m-frontiers \& $\alpha$-frontier in \Sexpr{annee1} and \Sexpr{annee2}}
 
-We compute below the $\alpha$-frontier with only one input ($E$, here) and one output and graph it for \Sexpr{annee1} and \Sexpr{annee2}. As soon as we have and aggregate input index, we'll replace it here...
+We compute below the $\alpha$-frontier with only one input ($K$, here) and one output and graph it for \Sexpr{annee1} and \Sexpr{annee2}. As soon as we have and aggregate input index, we'll replace it here...
 
 <<fig=TRUE,echo=FALSE>>=
 annee <-annee1
@@ -567,14 +566,14 @@ Workdata <-subset(Mydata, Test0 > 0)
 dataref.y <- subset(Workdata,year==annee )
 #dataref.y <- Workdata   # si on veut tout ensemble
 
-plot(dataref.y$E,dataref.y$Y,  pch="+", col="darkblue",
+plot(dataref.y$K,dataref.y$Y,  pch="+", col="darkblue",
      main=paste(" alpha-frontier (output-oriented) in", annee, ", alpha=",alpha,"") )
-textxy(dataref.y$E,dataref.y$Y, dataref.y$carrier)
+textxy(dataref.y$K,dataref.y$Y, dataref.y$carrier)
 
-dea.plot.frontier(dataref.y$E, dataref.y$Y, RTS="vrs", add= TRUE, lty="dashed", col="blue", lwd=1)
-rug(dataref.y$E, col = "grey")
+dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="vrs", add= TRUE, lty="dashed", col="blue", lwd=1)
+rug(dataref.y$K, col = "grey")
 
-alphafrontier.2d(as.matrix(dataref.y$E),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = TRUE, shade=TRUE)
+alphafrontier.2d(as.matrix(dataref.y$K),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = F, shade=F)
 
 legend("bottomright",legend=c("Points", "DEA VRS","alpha-frontier", "confidence bound"),lty=1:4,col=c( "black", "blue","green", "grey"))
 @
@@ -585,14 +584,14 @@ annee <-annee2
 dataref.y <- subset(Workdata,year==annee )
 #dataref.y <- Workdata
 
-plot(dataref.y$E,dataref.y$Y,  pch="+", col="darkblue", 
+plot(dataref.y$K,dataref.y$Y,  pch="+", col="darkblue", 
      main=paste(" alpha-frontier (output-oriented) in", annee, ", alpha=",alpha,"") )
-textxy(dataref.y$E,dataref.y$Y, dataref.y$carrier)
+textxy(dataref.y$K,dataref.y$Y, dataref.y$carrier)
 
-dea.plot.frontier(dataref.y$E, dataref.y$Y, RTS="vrs", add= TRUE, lty="dashed", col="blue", lwd=1)
-rug(dataref.y$E, col = "grey")
+dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="vrs", add= TRUE, lty="dashed", col="blue", lwd=1)
+rug(dataref.y$K, col = "grey")
 
-alphafrontier.2d(as.matrix(dataref.y$E),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = TRUE, shade=TRUE)
+alphafrontier.2d(as.matrix(dataref.y$K),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = F, shade=F)
 
 
 legend("topleft",legend=c("Points", "DEA VRS","alpha-frontier", "confidence bound"),lty=2:4,col=c( "darkblue", "blue","green", "grey"))
@@ -729,7 +728,7 @@ We propose to compute the efficiency (resp. m-efficiency and $\alpha$-efficiency
 
 \clearpage
 
-\subsection{Contemporaneous efficiencies}
+\subsection{Contemporaneous efficiencies 1 seul input (11/06/13)}
 
 <<echo=FALSE, results=hide>>=
 ## Scores par an sur  frontieres contemporaines     
@@ -752,10 +751,13 @@ for (i in 1:length(x)) {
 
     dataref <- subset(Workdata, year==x[i])   #<- firmes de l'annie courante 
     nref=nrow(dataref)
-    xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
+    # 4 inputs  !!!
+    # xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
+     # 1 seul input (K!!!)
+    xref=matrix(c(dataref$K),nrow=nref,ncol=1)
+    
     yref=matrix(c(dataref$Y),nrow=nref,ncol=1)
 
-    
 # recuperation du score DEA TOUTES  firmes sur frontiere contemporaine
     score.farell <- Benchmarking::dea(X=xref, Y=yref, XREF=xref, YREF=yref, RTS="vrs", ORIENTATION="out")
     foo.c <-1/score.farell$eff
@@ -793,7 +795,6 @@ score.alpha.cont$y.c <- as.factor(score.alpha.cont$y.c)
 
 colors <- rainbow(length(unique(Workdata$year))) 
 
-
 @
 
 %%%% DEA 
@@ -814,7 +815,6 @@ p <- qplot(y.c, score.dea.cont, data=score.dea.cont, geom="boxplot", outlier=FAL
       ylab = "DEA-Efficiency (output oriented)", 
       xlab = "Years ", outline =FALSE)
 p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
-
 
 p
 @
@@ -854,7 +854,7 @@ abline(h = 1, col = "red",  lwd=2)
 
 << echo=FALSE, results=hide, fig=TRUE>>=
 p<-qplot(y.c, score.m.cont, data=score.m.cont, geom=c("boxplot"), 
-      fill=y.c, main="Airlines efficiency on contemporaneous order-m frontier",
+      fill=y.c, main="Airlines efficiency measured relative to contemporaneous order-m frontier",
       ylab = "order-m Efficiency (output oriented)", 
       xlab = "Years ", outline =FALSE)
 p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
@@ -876,7 +876,7 @@ abline(h = 1, col = "red",  lwd=2)
 
 << echo=FALSE, results=hide, fig=TRUE>>=
 p <- qplot(y.c, score.alpha.cont, data=score.alpha.cont, geom=c("boxplot"), 
-      fill=y.c, main="Airlines efficiency on contemporaneous alpha frontier",
+      fill=y.c, main="Airlines efficiency measured relative to contemporaneous alpha frontier",
       ylab = "alpha Efficiency (output oriented)", 
       xlab = "Years ", outline =FALSE)
 
@@ -909,14 +909,23 @@ y <- NA               # annees repliquees sur les observations
 
 dataref <- subset(Workdata)  # <- frontiere toutes annees
 nref=nrow(dataref)
-xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
+
+ # 4 inputs  !!!
+# xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
+ # 1 seul input (K!!!)
+    xref=matrix(c(dataref$K),nrow=nref,ncol=1)
+
 yref=matrix(c(dataref$Y),nrow=nref,ncol=1)
 
 for (i in 1:length(x)) {
     
     dataobs <- subset(Workdata,year==x[i])   #<- firmes de l'annie courante 
     nobs=nrow(dataobs)
-    xobs=matrix(c(dataobs$K,dataobs$L,dataobs$E, dataobs$M),nrow=nobs,ncol=4)
+    # 4 inputs
+    # xobs=matrix(c(dataobs$K,dataobs$L,dataobs$E, dataobs$M),nrow=nobs,ncol=4)
+     # 1 seul input (K) !! inputs
+    xobs=matrix(c(dataobs$K),nrow=nobs,ncol=1)
+    
     yobs=matrix(c(dataobs$Y),nrow=nobs,ncol=1)
     
 # recuperation du score DEA TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
@@ -1133,60 +1142,60 @@ where $D^{CRS}_t(x,y)$ incorporates  the assumption of \textit{Constant} Return 
 
 
 
-% 
-% <<echo=FALSE, results=hide>>=
-% # definiton of elements 
-% i1=seq(annee1, annee2-1, by=1)  # An 1
-% i2=seq(annee1+1,annee2, by=1)   # An 2
-% # ajout de 2 sequences qui nous interessent (et d'un saut par 00)
-% i1<- c(i1, 1900,2002)
-% i2 <-c(i2,1900, 2008)
-% 
-% #---------------------------------------------
-% ## III: Calcul des indisces DE Malmqvuist(Simar-Wilson 1998 ; Wheelock-Wilson, 1999)
-% table.malm.ww <-data.frame(toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0)) 
-% 
-% for (k in 1:length(i1)) {
-%     data1 <- subset(Workdata,year==i1[k])  # <-  annee 1
-%     n1=nrow(data1)
-%     data1.x=t(matrix(c(data1$K,data1$L,data1$M),nrow=n1,ncol=3))
-%     data1.y=t(matrix(c(data1$Y),nrow=n1,ncol=1))
-%     data1.id=t(matrix(c(data1$Id),nrow=n1,ncol=1))
-%     
-%     data2 <- subset(Workdata,year==i2[k])  # <-  annee 2
-%     n2=nrow(data2)
-%     data2.x=t(matrix(c(data2$K,data2$L,data2$M),nrow=n2,ncol=3))
-%     data2.y=t(matrix(c(data2$Y),nrow=n2,ncol=1))
-%     data2.id=t(matrix(c(data2$Id),nrow=n2,ncol=1))
-% 
-%     #definition de la Table 
-%     #estimation
-%     malm.com <-FEAR::malmquist.components(X1=data1.x, Y1=data1.y, ID1=data1.id, 
-%                                 X2=data2.x, Y2=data2.y, ID2=data2.id, 
-%                                 ORIENTATION=2)
-%     
-%     malm.all <-FEAR::malmquist(LIST=malm.com)
-%     # Decomposition fagon Fare et al...
-%     spam <-cbind(i1[k],i2[k], 
-%                  mean(malm.all$malm,na.rm = TRUE), 
-%                  mean(malm.all$pure.eff,na.rm = TRUE),  
-%                  mean(malm.all$scale,na.rm = TRUE), 
-%                  mean(malm.all$pure.tech,na.rm = TRUE),
-%                  mean(malm.all$scale.tech, na.rm = TRUE), 
-%                  length(malm.all$scale.tech),
-%                  n1, n2)
-%     table.malm.ww <-rbind(table.malm.ww,spam)
-% }  
-% 
-% @ 
-% 
-% <<echo =FALSE, results = tex>>=
-% # mise en forme du tableau
-% names(table.malm.ww) <- c("An1", "An2", "Malm", "Pure Eff", "Scale" , "Pure Tech" , "ScaleTech", "N","n1", "n2")
-% foo3 <- xtable(table.malm.ww, label ="malmquistWW", caption = "Malmquist indexes (average) decompsed following  SW(1998) et WW (1999) for a choice of successive years")
-% digits(foo3)[c(2,3,9,10)] <- 0
-% print(foo3)
-% @
+
+<<echo=FALSE, results=hide>>=
+# definiton of elements 
+i1=seq(annee1, annee2-1, by=1)  # An 1
+i2=seq(annee1+1,annee2, by=1)   # An 2
+# ajout de 2 sequences qui nous interessent (et d'un saut par 00)
+i1<- c(i1, 1900,2002)
+i2 <-c(i2,1900, 2008)
+
+#---------------------------------------------
+## III: Calcul des indisces DE Malmqvuist(Simar-Wilson 1998 ; Wheelock-Wilson, 1999)
+table.malm.ww <-data.frame(toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0)) 
+
+for (k in 1:length(i1)) {
+    data1 <- subset(Workdata,year==i1[k])  # <-  annee 1
+    n1=nrow(data1)
+    data1.x=t(matrix(c(data1$K,data1$L,data1$M),nrow=n1,ncol=3))
+    data1.y=t(matrix(c(data1$Y),nrow=n1,ncol=1))
+    data1.id=t(matrix(c(data1$Id),nrow=n1,ncol=1))
+    
+    data2 <- subset(Workdata,year==i2[k])  # <-  annee 2
+    n2=nrow(data2)
+    data2.x=t(matrix(c(data2$K,data2$L,data2$M),nrow=n2,ncol=3))
+    data2.y=t(matrix(c(data2$Y),nrow=n2,ncol=1))
+    data2.id=t(matrix(c(data2$Id),nrow=n2,ncol=1))
+
+    #definition de la Table 
+    #estimation
+    malm.com <-FEAR::malmquist.components(X1=data1.x, Y1=data1.y, ID1=data1.id, 
+                                X2=data2.x, Y2=data2.y, ID2=data2.id, 
+                                ORIENTATION=2)
+    
+    malm.all <-FEAR::malmquist(LIST=malm.com)
+    # Decomposition fagon Fare et al...
+    spam <-cbind(i1[k],i2[k], 
+                 mean(malm.all$malm,na.rm = TRUE), 
+                 mean(malm.all$pure.eff,na.rm = TRUE),  
+                 mean(malm.all$scale,na.rm = TRUE), 
+                 mean(malm.all$pure.tech,na.rm = TRUE),
+                 mean(malm.all$scale.tech, na.rm = TRUE), 
+                 length(malm.all$scale.tech),
+                 n1, n2)
+    table.malm.ww <-rbind(table.malm.ww,spam)
+}  
+
+@ 
+
+<<echo =FALSE, results = tex>>=
+# mise en forme du tableau
+names(table.malm.ww) <- c("An1", "An2", "Malm", "Pure Eff", "Scale" , "Pure Tech" , "ScaleTech", "N","n1", "n2")
+foo3 <- xtable(table.malm.ww, label ="malmquistWW", caption = "Malmquist indexes (average) decompsed following  SW(1998) et WW (1999) for a choice of successive years")
+digits(foo3)[c(2,3,9,10)] <- 0
+print(foo3)
+@
 
 \clearpage
 
@@ -1321,7 +1330,7 @@ for (i in 1:length(x)) {
     score.farell <- Benchmarking::dea(X=xobs, Y=yobs, RTS="vrs", ORIENTATION="out")
     score.year.year <-1/score.farell$eff
     foo <- cbind(dataobs[,1:5], score.year.year)
-    score.DEA<- rbind(score.DEA, foo) # Rbind parce que pas le mjme nombre de firmes...
+    score.DEA<- rbind(score.DEA, foo) # Rbind parce que pas le même nombre de firmes...
     
     
     foo <- data.frame("Name" = score.DEA$carriername, 
