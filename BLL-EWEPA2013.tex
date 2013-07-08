@@ -34,116 +34,12 @@ An Empirical Application with order-m and $\alpha$-Frontiers}
 
 %\frame{{\color{blue} \large ROADMAP} \tableofcontents}
 
-\section{Introduction}
-
-\subsection{Empirical (and preliminary) paper}
-\frame[t] {
-\begin{itemize}[<+->]
-  \item Questions addressed in this (preliminary) paper:
-  \bigskip
-  \begin{enumerate}
-    \item What are the features of this industry efficiency at a world level ?
-    \item Which are the most efficient airlines ?
-    \item Do we observe technical change over time?
-    \item Is the ranking of airlines evolving over time ?
-    \item Are majors more efficient than low cost carriers (LCC) ?
-  \end{enumerate}
-  \bigskip
-  \item {Questions \color{brique}{not yet} addressed:}
-  \bigskip
-  \begin{enumerate}
-    \item Did the fuel efficiency of airline improve over time ?
-    \item Did labour efficiency improve over time ?
-    \item Is competition affecting productivity  ? i.e. Are the airlines who operate on routes with more competitors more efficient
-    \item Do airlines involved in an alliance have a higher productivity ?
-  \end{enumerate}
-\end{itemize}
-}
-
-\subsection{Why using order-m or $\alpha$-frontiers ?}
-\frame[t] {
- \vspace{1cm}
-
- Why using order-m or $\alpha$-frontiers ?
-
-\begin{itemize}[<+->]
-  \item These methods could be used to detect (and then remove) influential firms or ``outliers'' (Simar, 2003).
-  \item[$\rightarrow$] We want to keep those firms in the analysis !
-  \item order-m scores have an economic (and local) interpretation :
-  \item[]$\rightarrow$ it is (input-oriented case)  the ``\emph{expected minimal value  of input achievable among m firms drawn from the population of firms producing at least this level of output}'' (Cazals, Florens and Simar, 2002).
-      
- % \item[]$\rightarrow$ it is (output-oriented case) the  ``\emph{expected maximum value of output among m firms drawn from the population of firms using less than this level of inputs}''
-
-  \item Could be ``fun'' to use  and to compare with other methods on real data.
-  
-\end{itemize}
-}
-
-\subsection{More precise definition of order-m or $\alpha$-frontiers ?}
-\frame[t] {
-\begin{itemize}[<+->]
-  \item[]The production set is defined simply as:
-\begin{eqnarray*}
-        \Psi            &=& \left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\} \\
-  \end{eqnarray*}
-  \item[] Can be approximated by several Sets :
-\begin{eqnarray*}      
-\widehat{\Psi}_{FDH}    &=& \left\{ \left( x,y\right) | y \leq Y_i ,\;  x \geq X_i, \; i=1, \cdots n \right\} \\
- \widehat{\Psi}_{DEA}    &=& \left\{ \left( x,y\right) |  \;y\leq \sum_{i =1}^n \gamma_{i} Y_{i},x\geq \sum_{i =1}^n  \gamma_{i} X_{i}, \gamma_{i }\geq 0 ; \sum_{i =1}^n \gamma_{i} =1 \right\} \\
-  \Psi_m (x)            &=& E \left [ max(Y^1, \cdots, Y^m) | X  \leq x   \right ] \\
-\end{eqnarray*}
-\end{itemize}
-}
-
-\subsection{A different way of defining efficiency scores) }
-
-\frame[t] {
-\begin{itemize}[<+->]
- \item   For any $(x,y) \in \Psi$   $\Psi = \left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\}$
- \item $\Psi$ is also the support of $H_{X,Y}(x,y)= Prob( X  \leq x , Y \geq y)$ which can be interpreted as the probability for a firm operating at level (x,y) to be dominated.
-  \item Note that :
-  \begin{eqnarray*}
-   H_{X,Y}(x,y) &=& Prob( X  \leq x | Y \geq y) Prob(Y \geq y )  = F_c(x|y)S_Y(y) \\
-                 &=& Prob(Y \geq y | X  \leq x ) Prob(X  \leq x )  = S_c(y|x)F_X(x) \\
-   \end{eqnarray*}
-   The support of $F_c(x|y)$
-\end{itemize}
-}
+%\section{Introduction}
 
 
-\frame[t] {
-\begin{itemize}[<+->]
- \item  The production set is defined simply as:  $\Psi = \left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\}$
- \item $\Psi$ is also the support of $H_{X,Y}(x,y)= Prob( X  \leq x , Y \geq y)$ which can be interpreted as the probability for a firm operating at level (x,y) to be dominated.
-  \item Note that :
-  \begin{eqnarray*}
-   H_{X,Y}(x,y) &=& Prob( X  \leq x | Y \geq y) Prob(Y \geq y )  = F_c(x|y)S_Y(y) \\
-                 &=& Prob(Y \geq y | X  \leq x ) Prob(X  \leq x )  = S_c(y|x)F_X(x) \\
-   \end{eqnarray*}
-   The support of $F_c(x|y)$
-\end{itemize}
-}
-
-
-\frame[t] {
-\begin{itemize}[<+->]
-  \item[order-m] The production set can be described in terms of its sections. $ \forall x$, the frontier in the output direction $\Psi(x) = \{ y | (x,y) \in \Psi \}$. It is also the upper boundary of the support of $F_c(y|x)$. 
-\begin{eqnarray*}
- \Psi(x)            &=& sup \left\{ y | F_c(y|x) < 1 \right\} \\
-\end{eqnarray*}
-\item  $\Psi(x)$ is the maximum level of output attainable for any firm using less than the level $x$ of input.
-\item given a fixed integer $m$,  for a given level of input $x$, the  order-m frontier in the output direction $\Psi_m(x)$ is:
-\begin{eqnarray*}
- \Psi_m (x)            &=& E \left [ max(Y^1, \cdots, Y^m) | X  \leq x   \right ] \\
-\end{eqnarray*}
-\item it is the expected maximum value of m random variables $Y^1, \cdots, Y^m$  of m firms drawn from the population of firms using using less than the level $x$ of input.
-\end{itemize}
-}
-
-
-\section{Airlines industry and Data}
+\section{Airlines industry and data}
  \frame[t] {
-  \vspace{1cm}
+ Very preliminary investigation on this industry
 \begin{itemize}
 %The processed food and beverage industry is Australia’s largest manufacturing industry with a turnover of more than $71.4 billion in 2005–06.
   \item Airline industry (world level)
@@ -164,89 +60,346 @@ An Empirical Application with order-m and $\alpha$-Frontiers}
 }
 
 
+\subsection{Questions}
+\frame[t] {
+\begin{itemize}[<+->]
+  \item Questions addressed in this (preliminary) paper:
+  \bigskip
+  \begin{itemize}
+    \item What are the features of this industry efficiency at a world level ?
+    \item[-] Which are the most efficient airlines ?
+    \item[-] Are majors more efficient than low cost carriers (LCC) ?
+    \item Do we observe ``changes'' over time?
+    \item[-] Technical change over time?
+    \item[-] Is the ranking of airlines evolving over time ?
+
+  \end{itemize}
+  \bigskip
+  \item {Questions \color{brique}{not yet} addressed:}
+  \bigskip
+  \begin{itemize}
+    \item Did the fuel efficiency of airline improve over time ?
+    \item Did labour efficiency improve over time ?
+    \item Is competition affecting productivity  ? i.e. Are the airlines who operate on routes with more competitors more efficient
+    \item Do airlines involved in an alliance have a higher productivity ?
+  \end{itemize}
+\end{itemize}
+}
+
+
 \subsection{Data}
  \frame[t] {
   \vspace{1cm}
-  Data
+  Data (so far)
 \begin{itemize}
-  \item (so far) We have 1 output $Y$ and 4 inputs ($K$, $L$, $E$, $M$)
-  \item $Y$ is the sum of RPKs (revenue-passenger kilometers), RTKs (Revenue tonne-kilometre), and incidental revenues (transformed in quantities) in Pax $\times$ Km
-  \item $K$ is the Flying capital defined as the total fleet max take-off weight (in kg).
-  \item $L$ is the total personnel (permanent + non-permanent) in pers.x month
-  \item $E$ is the total fuel quantity (in Gallons)
-  \item $M$ are other operating expediture/price index.
+  \item  We have 1 output $Y$ and 4 inputs ($K$, $L$, $E$, $M$)
+  \begin{itemize}
+      \item $Y$ is the airlines revenue (including passenger \& freight revenue, and also incidental revenue)
+      \item $K$ is the Flying capital defined as the total fleet max take-off weight (in kg).
+      \item $L$ is the total personnel (permanent + non-permanent) in pers.x month
+      \item $E$ is the total fuel quantity (in Gallons)
+      \item $M$ are other operating expenditure/price index.
+  \end{itemize}
+  \item observed from 2002-2008
+\end{itemize}
+}
+
+
+\section{Order-m or $\alpha$-frontiers ?}
+\frame[t] {
+  Why using order-m or $\alpha$-frontiers ?
+\begin{itemize}[<+->]
+\item These methods are robust to influential firms or ``outliers''
+  \item Could be used to detect (and remove) influential firms or ``outliers'' (Simar, 2003) and then use ``classical'' methods
+  \item[$\rightarrow$] We want to keep those firms in the analysis !
+  \item Methods do not suffer of \textit{the curse of dimensionality} (more on that later) % see p78 of Daraio Simar book 2007
+  \item order-m scores have an economic (and local) interpretation :
+  %\item[]$\rightarrow$ it is (input-oriented case)  the ``\emph{expected minimal value  of input achievable among m firms drawn from the population of firms producing at least this level of output}'' (Cazals, Florens and Simar, 2002).
+
+  \item[]$\rightarrow$ it is (output-oriented case) the  ``\emph{expected maximum value of output among m firms drawn from the population of firms using less than this level of inputs}''
+  \item $\alpha$-frontiers have a very appealing statistical definition too..
+  \item Could be ``fun'' to use  and to compare with other methods on real data.
+
+\end{itemize}
+}
+
+\subsection{More precise definition of order-m or $\alpha$-frontiers ?}
+\frame[t] {
+\begin{itemize}[<+->]
+  \item[]The (unknown) production set $\Psi  $ is defined simply as:
+\begin{eqnarray*}
+        \Psi            &=& \left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\} \\
+  \end{eqnarray*}
+  \item[] Can be approximated by several Sets :
+\begin{eqnarray*}
+\widehat{\Psi}_{FDH}    &=& \left\{ \left( x,y\right) | y \leq Y_i ,\;  x \geq X_i, \; i=1, \cdots n \right\} \\
+ \widehat{\Psi}_{DEA}    &=& \left\{ \left( x,y\right) |  \;y\leq \sum_{i =1}^n \gamma_{i} Y_{i},x\geq \sum_{i =1}^n  \gamma_{i} X_{i}, \gamma_{i }\geq 0 ; \sum_{i =1}^n \gamma_{i} =1 \right\} \\
+  %\Psi_m (x)            &=& E \left [ max(Y^1, \cdots, Y^m) | X  \leq x   \right ] \\
+\end{eqnarray*}
+\end{itemize}
+}
+
+\subsection{A different way of defining efficiency scores(Daouia-Simar, 2007) }
+
+\frame[t] {
+\begin{itemize}[<+->]
+  \item[$\Psi$] Consider $H_{X,Y}(x,y)= Prob( X  \leq x , Y \geq y)$ which is the probability for a firm operating at level (x,y) to be dominated.
+  \item In short:  $(x,y) \in \Psi \Leftrightarrow H_{X,Y}(x,y) >0 $
+  \item[]
+  \item[] Note that: $H_{X,Y}(x,y)= Prob( X  \leq x , Y \geq y)$ can be decomposed:
+  \begin{eqnarray*}
+   = Prob( X  \leq x | Y \geq y) Prob(Y \geq y )  &=& F_c(x|y)S_Y(y) \\
+   = Prob(Y \geq y | X  \leq x ) Prob(X  \leq x )  &=& S_c(y|x)F_X(x) \\
+   \end{eqnarray*}
+   \item For all $x$ such that $ F_X(x)>0 $, the (Farell) output-efficiency score can be defined as (Daraio \& Simar, 2006):
+   \begin{eqnarray*}
+    \lambda(x,y) &=& sup\{\lambda | H_{X,Y}(x,\lambda y) >0 \}\\
+                &=& sup\{\lambda | S_c( \lambda y|x) >0 \} \\
+   \end{eqnarray*}
+\end{itemize}
+}
+
+
+\frame[t] {
+\begin{itemize}[<+->]
+   \item[$\alpha$] So if $\lambda(x,y)$  is the (Farell) output-efficiency score :
+   \begin{eqnarray*}
+    \lambda(x,y) &=& sup\{\lambda | H_{X,Y}(x,y) >0 \} \\
+                &=& sup\{\lambda | S_c(x,y) >0 \} \\
+   \end{eqnarray*}
+   \item For all $x$ such that $ F_X(x)>0 $, the $\alpha$\textit{-quantile  output efficiency score} is simply defined as (Daouia \& Simar, 2007) :
+   \begin{eqnarray*}
+    \lambda_{\alpha}(x,y)    &=& sup \{\lambda | S_c( \lambda y|x) > 1- \alpha \} \\
+   \end{eqnarray*}
+   \item and so the $\alpha$\textit{-frontier (output-oriented case)} is the set:
+    \begin{eqnarray*}
+    \Psi_{\alpha}  = \{ x, \lambda(x,y)\cdot y    \; \; s.t. \;  (x,y) \in \Psi \} \\
+   \end{eqnarray*}
 
 \end{itemize}
 }
 
 
 
-
-\section{Efficiency over time}
- \frame[t] {
-  \vspace{1cm}
-Visualizing data over time is difficult
-\begin{itemize}
-  \item Let's try with R-googleVis
+\frame[t] {
+\begin{itemize}[<+->]
+  \item[order-m] The production set can be described in terms of its sections. $ \forall x$, the frontier in the output direction $\Psi(x)$:
+  \begin{eqnarray*}
+  \Psi(x)  & =& sup \{ y | (x,y) \in \Psi \} \\
+       &= & sup \{y | Sc(y|x) > 0 \} \\
+   ( &= & sup \{y | Prob(Y \geq y | X  \leq x )  > 0 \} )
+ \end{eqnarray*}
+    \item given a fixed integer $m$,  for a given level of input $x$, the  \textit{order-m frontier in the output direction} $\Psi_m(x)$ is:
+    \begin{eqnarray*}
+         \Psi_m (x)     = E \left[ max(Y^1, \cdots, Y^m) | X  \leq x   \right]
+    \end{eqnarray*}
+    \item it is the expected maximum value of $m$ random variables $Y^1, \cdots, Y^m$  of $m$ firms drawn from the population of firms using using less than the level $x$ of input.
+    \item And so the \textit{order-m output efficiency} measure is
+    \begin{eqnarray*}
+        \lambda_{m}(x,y) = sup\{\lambda | (x, \lambda y) \in \Psi_m(x) \}
+     \end{eqnarray*}
 \end{itemize}
+
 }
+
+
+\section{Airlines industry (in 2-D)}
+
+
 
 \frame[t] {
   \vspace{1cm}
 Efficiency over time : 3 questions
 \begin{itemize}[<+->]
-  \item How to measure efficiency  ?
-  \item[] $\rightarrow$ Using distance towards a frontier (possibly an order-m or $\alpha$-frontier)
+  \item How to measure efficiency each year ? Over years ?
+  \item[$\rightarrow$]  Using distance towards a frontier (possibly an order-m or $\alpha$-frontier)
   \item How to visualize/measure changes over time ?
-  \item[] $\rightarrow$ Question addressed in this paper
+  \item[$\rightarrow$]  Question addressed in this paper
   \item How to disentangle the effects of technical change vs productivity changes ?
-  \item[] $\rightarrow$ Using decomposition of productivity index (Simar-Wilson 98, Wheelock Wilson,  1999 or  Färe, Grosskopft \& Sickles 2007))
+  \item[$\rightarrow$]  Using decomposition of productivity index (Simar-Wilson 98, Wheelock Wilson,  1999 or  F\"{a}re, Grosskopft \& Sickles 2007)
 
 \end{itemize}
+}
+
+
+\subsection{Airlines}
+
+\frame[t] {
+\begin{itemize}
+  \item We choose here to represent the frontiers \textit{as if} $K$ was the only input in 2002 and (with LCC highlighted ).
+     \includegraphics[width=0.7\textwidth]{Graphics/GraphR-021}
+\end{itemize}
+}
+
+
+\frame[t] {
+\begin{itemize}
+  \item Computing the efficiency gives a ranking of airlines
+  \item10 first airlines efficiency, year 2002 (output oriented, 4 inputs, sorted by $\alpha$-scores).
+\end{itemize}
+{\footnotesize
+\begin{tabular}{rllllll}
+  \hline
+ & code & Airline & DEA & FDH & M-Score & $\alpha$-Score \\
+  \hline
+1 & 5X & UNITED PARCEL & 1 & 1 & 1.186 & 2.569 \\
+  2 & KL & KLM & 1 & 1 & 1.244 & 2.418 \\
+  3 & AS & ALASKA & 1 & 1 & 1.131 & 1.651 \\
+  4 & AF & AIR FRANCE & 1 & 1 & 1.177 & 1.577 \\
+  5 & TZ & ATA AIRLINES & 0.77 & 1 & 1.088 & 1.516 \\
+  6 & US & US AIRWAYS & 1 & 1 & 1.161 & 1.415 \\
+  7 & IB & IBERIA & 0.868 & 1 & 1.113 & 1.39 \\
+  8 & DL & DELTA & 1 & 1 & 1.129 & 1.356 \\
+  9 & CO & CONTINENTAL & 0.951 & 1 & 1.124 & 1.332 \\
+  10 & FX & FEDERAL EXPRESS & 1 & 1 & 1.139 & 1.285 \\
+   \hline
+\end{tabular}
+}
+}
+
+
+\frame[t] {
+\begin{itemize}
+   \item 10 first airlines efficiency, year 2002 (output oriented, K unique input, sorted by $\alpha$-scores).
+\end{itemize}
+{\footnotesize
+\begin{tabular}{rllllll}
+  \hline
+ & code & Airline & DEA & FDH & M-Score & $\alpha$-Score \\
+  \hline
+1 & KL & KLM & 0.79 & 1 & 1.192 & 1.739 \\
+  2 & IB & IBERIA & 0.549 & 1 & 1.113 & 1.39 \\
+  3 & DL & DELTA & 0.808 & 1 & 1.129 & 1.356 \\
+  4 & FX & FEDERAL EXPRESS & 1 & 1 & 1.139 & 1.285 \\
+  5 & US & US AIRWAYS & 0.87 & 1 & 1.105 & 1.252 \\
+  6 & AF & AIR FRANCE & 0.681 & 1 & 1.081 & 1.185 \\
+  7 & WN & SOUTHWEST & 0.786 & 1 & 1.096 & 1.13 \\
+  8 & HP & AMERICA WEST & 0.613 & 1 & 1.043 & 1.103 \\
+  9 & CO & CONTINENTAL & 0.714 & 1 & 1.056 & 1.063 \\
+  10 & AS & ALASKA & 0.767 & 1 & 1.046 & 1.061 \\
+   \hline
+\end{tabular}
+}
+}
+
+
+\frame[t] {
+\begin{itemize}
+  \item We choose here to represent the frontiers \textit{as if} $K$ was the only input in 2005 and (with LCC highlighted ).
+     \includegraphics[width=0.7\textwidth]{Graphics/GraphR-023}
+\end{itemize}
+}
+
+
+\frame[t] {
+\begin{itemize}
+  \item Computing the efficiency gives a ranking of airlines
+  \item 10 first airlines efficiency, year 2005 (output oriented, 4 inputs, sorted by $\alpha$-scores).
+\end{itemize}
+{\footnotesize
+\begin{tabular}{rllllll}
+  \hline
+ & code & Airline & DEA & FDH & M-Score & $\alpha$-Score \\
+  \hline
+1 & KL & KLM & 0.79 & 1 & 1.192 & 1.739 \\
+  2 & IB & IBERIA & 0.549 & 1 & 1.113 & 1.39 \\
+  3 & DL & DELTA & 0.808 & 1 & 1.129 & 1.356 \\
+  4 & FX & FEDERAL EXPRESS & 1 & 1 & 1.139 & 1.285 \\
+  5 & US & US AIRWAYS & 0.87 & 1 & 1.105 & 1.252 \\
+  6 & AF & AIR FRANCE & 0.681 & 1 & 1.081 & 1.185 \\
+  7 & WN & SOUTHWEST & 0.786 & 1 & 1.096 & 1.13 \\
+  8 & HP & AMERICA WEST & 0.613 & 1 & 1.043 & 1.103 \\
+  9 & CO & CONTINENTAL & 0.714 & 1 & 1.056 & 1.063 \\
+  10 & AS & ALASKA & 0.767 & 1 & 1.046 & 1.061 \\
+   \hline
+\end{tabular}
+
+}
+}
+
+\frame[t] {
+\begin{itemize}
+  \item Computing the efficiency gives a ranking of airlines
+  \item10 first airlines efficiency, year 2005 (output oriented, 1 input, sorted by $\alpha$-scores).
+\end{itemize}
+{\footnotesize
+\begin{tabular}{rllllll}
+  \hline
+ & code & Airline & DEA & FDH & M-Score & $\alpha$-Score \\
+  \hline
+1 & WN & SOUTHWEST & 0.779 & 1 & 1.342 & 1.919 \\
+  2 & NH & ALL NIPPON AIRWAYS & 0.914 & 1 & 1.368 & 1.642 \\
+  3 & LX & SWISS & 0.985 & 1 & 1.263 & 1.636 \\
+  4 & IB & IBERIA & 0.639 & 1 & 1.263 & 1.576 \\
+  5 & OS & AUSTRIAN AIRLINES GROUP & 1 & 1 & 1.2 & 1.573 \\
+  6 & BD & BRITISH MIDLAND & 0.864 & 1 & 1.125 & 1.515 \\
+  7 & CO & CONTINENTAL & 0.764 & 0.938 & 1.135 & 1.465 \\
+  8 & US & US AIRWAYS & 0.722 & 0.951 & 1.131 & 1.347 \\
+  9 & AF & AIR FRANCE & 0.948 & 1 & 1.184 & 1.328 \\
+  10 & FX & FEDERAL EXPRESS & 1 & 1 & 1.169 & 1.306 \\
+   \hline
+\end{tabular}
+
+}
+}
+
+
+%\section{Efficiency over time}
+% \frame[t] {
+%  \vspace{1cm}
+%Visualizing data over time is difficult
+%\begin{itemize}
+%  \item Let's try with R-googleVis
+%\end{itemize}
+%}
+
+\frame[t] {
+\begin{itemize}
+\item[] Efficiency scores in 2002
+\end{itemize}
+{\footnotesize
+\begin{tabular}{lrrrrrrrr}
+ \textbf{Variable} & $\mathbf{\bar{x}}$ & \textbf{Min} & $\mathbf{\widetilde{x}}$ & \textbf{Max} & $\mathbf{n}$ & $\bar{Nb}_{Eff}$ & $\bar{Nb}_{Super}$ & $\bar{X}_{not}$ \\
+  \hline
+\multicolumn{2}{l}{With 4 inputs} & \multicolumn{2}{c}{}\\
+DEA (vrs) & 0.79 & 0.25 & 0.86 & 1.00 & 56 & 18 &  0 & 0.69 \\
+FDH & 0.98 & 0.56 & 1.00 & 1.00 & 56 & 50 &  0 & 0.84 \\
+m-scores & 1.03 & 0.57 & 1.02 & 1.24 & 56 & 11 & 39 & 0.85 \\
+$\alpha$-scores & 1.12 & 0.56 & 1.00 & 2.57 & 56 & 33 & 17 & 0.84 \\ \hline
+\multicolumn{2}{l}{With One input} & \multicolumn{2}{c}{}\\
+DEA (vrs) &  0.47 & 0.02 & 0.43 & 1.00 & 56 &  3 &  0 & 0.44 \\
+FDH & 0.73 & 0.04 & 0.88 & 1.00 & 56 & 23 &  0 & 0.54 \\
+ m-scores & 0.76 & 0.04 & 0.91 & 1.19 & 56 &  4 & 20 & 0.54 \\
+$\alpha$-scores & 0.81 & 0.04 & 0.93 & 1.74 & 56 & 15 & 11 & 0.55 \\ \hline\hline
+\end{tabular}
+}
+}
+
+
+
+\frame[t] {
+\begin{itemize}
+\item[] Efficiency scores in 2005
+\end{itemize}
+{\footnotesize
+\begin{tabular}{lrrrrrrrr}
+ \textbf{Variable} & $\mathbf{\bar{x}}$ & \textbf{Min} & $\mathbf{\widetilde{x}}$ & \textbf{Max} & $\mathbf{n}$ & $\bar{Nb}_{Eff}$ & $\bar{Nb}_{Super}$ & $\bar{X}_{not}$ \\
+  \hline
+\multicolumn{2}{l}{With 4 inputs} & \multicolumn{2}{c}{}\\
+DEA (vrs) & 0.69 & 0.18 & 0.70 & 1.00 & 103 & 20 &  0 & 0.62 \\
+FDH & 0.94 & 0.35 & 1.00 & 1.00 & 103 & 82 &  0 & 0.71 \\
+m-scores  & 1.03 & 0.38 & 1.02 & 1.66 & 103 & 14 & 69 & 0.73 \\
+$\alpha$-scores & 1.16 & 0.35 & 1.00 & 3.49 & 103 & 53 & 34 & 0.71 \\ \hline
+\multicolumn{2}{l}{With One input} & \multicolumn{2}{c}{}\\
+DEA (vrs)& 0.36 & 0.01 & 0.30 & 1.00 & 103 &  5 &  0 & 0.33 \\
+FDH & 0.50 & 0.01 & 0.46 & 1.00 & 103 & 20 &  0 & 0.38 \\
+m-scores & 0.57 & 0.01 & 0.48 & 1.37 & 103 &  6 & 18 & 0.40 \\
+$\alpha$-scores & 0.66 & 0.01 & 0.61 & 1.92 & 103 & 12 & 16 & 0.45 \\ \hline\hline
+\end{tabular}
+}
 }
 
 \subsection{"Static" Measure of efficiency using Frontiers}
-\frame[t] {
-\begin{itemize}[<+->]
-   %\item \textbf{Technical efficiency scores} $\rightarrow$ {\color{brique} Production possibilities set}
-    \item We observe firms inputs and outputs  $(X_{i},Y_{i})$ \textbf{for a given year}.
-    \item The production set is defined simply as:
-    \begin{equation*}
-        \Psi=\left\{ \left( x,y\right) |\;x\; can \; produce \; y \right\}
-    \end{equation*}
-    \item Nonparametric data envelopment techniques are used to estimate this set. For example, DEA.
-    \begin{equation*}
-        \widehat{\Psi}_{DEA} = \left\{ \left( x,y\right) |  \;y\leq \sum_{i =1}^n \gamma_{i} Y_{i},x\geq \sum_{i =1}^n  \gamma_{i} X_{i}, \gamma_{i }\geq 0 ; \sum_{i =1}^n \gamma_{i} =1 \right\}
-        \end{equation*}
-    \item The estimated DEA (output oriented) efficiency score of a firm $(x_0, y_0)$ is given by :
-    \begin{equation*}
-        \widehat{\Lambda}_{DEA} = sup \left\{\lambda \;| \; (x_0, \lambda y_0) \in \widehat{\Psi}_{DEA}\right\}
-    \end{equation*}
-\end{itemize}
-}
-
-\frame[t] {
-\begin{itemize}
-  \item Illustration, one input, one output
-  \begin{figure}[t]
-    \includegraphics[width=0.6\textwidth]{Graphics/Points.pdf}
-  \end{figure}
-  \item[]
-\end{itemize}
-}
-
-\frame[t] {
-\begin{itemize}
-  \item Illustration, DEA Frontier
-  \begin{figure}[t]
-   \includegraphics[width=0.6\textwidth]{Graphics/PointsDEA.pdf}
-  \end{figure}
-  \item DEA efficiency score is measured as the vertical distance to the frontier
-\end{itemize}
-}
-
-
-\subsection{How to measure technical change over time ?}
 %(Tulkens and Van den Eeckaut, 1995)
 \frame[t] {
 Here, we  observe firms inputs and outputs  $(X_{it},Y_{it})$ \textbf{over the period} $t=1,\cdots,T$.
@@ -260,87 +413,41 @@ Here, we  observe firms inputs and outputs  $(X_{it},Y_{it})$ \textbf{over the p
     \end{itemize}
 }
 
-\frame[t] {
-\begin{itemize}
-  \item Illustration :  Production set time t=1
-  \begin{figure}[t]
-    \includegraphics[width=0.8\textwidth]{Graphics/ProgY1.pdf}
-  \end{figure}
-  \item[]
-\end{itemize}
-}
-
-\frame[t] {
-\begin{itemize}
-  \item Illustration : DEA Frontier, time t=1
-  \begin{figure}[t]
-   \includegraphics[width=0.8\textwidth]{Graphics/ProgY1F.pdf}
-  \end{figure}
-  \item DEA efficiency score date 2 =  distance to the frontier
-\end{itemize}
-}
-
-\frame[t] {
-\begin{itemize}
-  \item Illustration :  Production set time t=2
-  \begin{figure}[t]
-    \includegraphics[width=0.8\textwidth]{Graphics/ProgY2.pdf}
-  \end{figure}
-  \item[]
-\end{itemize}
-}
-
-\frame[t] {
-\begin{itemize}
-  \item Illustration : DEA Frontier, time t=2
-  \begin{figure}[t]
-   \includegraphics[width=0.8\textwidth]{Graphics/ProgY2F.pdf}
-  \end{figure}
-  \item DEA efficiency score date 2 =  distance to the frontier
-\end{itemize}
-}
-
+\subsection{How to measure technical change over time ?}
 
 \frame[t] {
 Questions:
 \begin{itemize}
     \item Frontier shifts are interesting (technical progress)  and cannot be ``seen'' if more than one input.
     \item Frontiers could be affected by `` outliers'' $\rightarrow$ Could use a more robust frontier estimator
-    \item  Scores at date 1 and date 2 not comparable (holes ?? in the dataset, changes in the production frontier)
+    \item  Scores at date 1 and date 2 not comparable.
+    \item[$\rightarrow$] Efficiency is a relative that changes with production sets (and frontiers).
 \end{itemize}
 }
 
 \frame[t] {
 \begin{itemize}
-    \item Efficiency scores of airlines on contemporaneous DEA frontiers
+    \item Efficiency scores of airlines on contemporaneous DEA frontiers (1 input)
     \begin{figure}[t]
-        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-028.pdf}
+       \includegraphics[width=0.6\textwidth]{Graphics/GraphR-034.pdf}
     \end{figure}
   \item
 \end{itemize}
 }
-%
-%\frame[t] {
-%\begin{itemize}
-%    \item Efficiency scores of airlines  on contemporaneous order-m frontiers
-%    \begin{figure}[t]
-%        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-032.pdf}
-%    \end{figure}
-%  \item[]
-%\end{itemize}
-%}
-%
-%\frame[t] {
-%\begin{itemize}
-%        \item Efficiency scores of airlines  on contemporaneous $\alpha$-frontiers
-%    \begin{figure}[t]
-%        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-034.pdf}
-%    \end{figure}
-%  \item[]
-%\end{itemize}
-%}
-%
-\section{Basic idea 1 }
+
+
+\frame[t] {
+\begin{itemize}
+    \item Efficiency scores of airlines on contemporaneous $\alpha$-frontiers (1 input)
+    \begin{figure}[t]
+       \includegraphics[width=0.6\textwidth]{Graphics/GraphR-037.pdf}
+    \end{figure}
+ 
+\end{itemize}
+}
+
+
+\section{All Time Production Set }
 \frame[t] {
 We propose to compute the all-time empirical production set (ATPS) as the union of all the production sets $t=1, \cdots, T$ :
    \bigskip
@@ -389,8 +496,9 @@ We propose to compute the all-time empirical production set (ATPS) as the union 
 
 
 \subsection{How to measure technical change over time ?}
+
 \frame[t] {
-Computing firms efficiency score relative to that frontier
+Computing firms efficiency score relative to that production set frontier
 \begin{itemize}
     \item The  $\Psi^{ATPS}$ production set  does not move over time.
     \item Computing firms efficiency each year gives a visualisation of the efficiency changes over time.
@@ -401,53 +509,69 @@ Computing firms efficiency score relative to that frontier
 
 \frame[t] {
 \begin{itemize}
-    \item Efficiency scores of airlines on $\Psi^{ATPS}$  DEA frontiers
+    \item Current year efficiency scores on $\Psi^{ATPS}$  DEA frontiers
     \begin{figure}[t]
-        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-037.pdf}
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-039.pdf}
     \end{figure}
-  \item
+  \item[] Output oriented DEA-efficiency scores with $K$ as unique input.
 \end{itemize}
 }
 
-%\frame[t] {
-%\begin{itemize}
-%    \item Efficiency scores of airlines  on $\Psi^{ATPS}$ order-m frontiers
-%    \begin{figure}[t]
-%        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-041.pdf}
-%    \end{figure}
-%  \item[]
-%\end{itemize}
-%}
-%
-%\frame[t] {
-%\begin{itemize}
-%        \item Efficiency scores of airlines  on $\Psi^{ATPS}$ $\alpha$-frontiers
-%    \begin{figure}[t]
-%        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-043.pdf}
-%    \end{figure}
-%  \item[]
-%\end{itemize}
-%}
+\frame[t] {
+\begin{itemize}
+    \item Current year efficiency scores  on $\Psi^{ATPS}$  $\alpha$-frontier
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-042.pdf}
+    \end{figure}
+  \item[] Output oriented $\alpha$-efficiency scores with $K$ as unique input.
+\end{itemize}
+}
+
+
+
+
+\frame[t] {
+\begin{itemize}
+    \item Current year efficiency scores on $\Psi^{ATPS}$  DEA frontiers
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-039.pdf}
+    \end{figure}
+  \item[] Output oriented DEA-efficiency scores with  4 inputs.
+\end{itemize}
+}
+
+\frame[t] {
+\begin{itemize}
+    \item Current year efficiency scores  on $\Psi^{ATPS}$  $\alpha$-frontier
+    \begin{figure}[t]
+        \includegraphics[width=0.6\textwidth]{Graphics/GraphR-042.pdf}
+    \end{figure}
+  \item[] Output oriented $\alpha$-efficiency scores with  4 inputs.
+\end{itemize}
+}
+
+
+
 
 \subsection{Results ?}
 \frame[t] {
-Computing firms efficiency score relative to that frontier
+Computing firms efficiency score relative to that frontier reveals:
 \begin{itemize}
-    \item The efficiency of firms increase year after years
-    \item Computing order-m or $\alpha$ frontier gives the same d=feature, but with some changes in the details (see year 2008)
+    \item The efficiency of firms increase year after year
+    \item Computing order-m or $\alpha$ frontier gives the same feature, but with some changes in the details (see year 2008)
     \item Some evidence on technical progress ( \textit{i.e.} shift upwards of the frontier)
+    \item Rsults not clear with 4 inputs.
     \end{itemize}
 }
 
 
 % Sur le graphique, on a l'impression que la productivité baisse en 2008 (version DEA) et pas sur order-m (à voir)
-\section{Basic idea 2 }
+\section{Malmquist decomposition}
 
-
-%\subsection{Stage 2: Decomposition of productivity change}
+\subsection{Simar \& Wilson (1998), Wheelock \& Wilson, 1999)}
 \frame[t] {
 For each subperiod $[t_1, t_2]$, we compute the Malmquist Index (MI) on a balanced panel using
- $(X_i, Y_i)_{t=t_1;t_2}$. We decompose MI into different elements following Simar and Wilson (1999).
+ $(X_i, Y_i)_{t=t_1;t_2}$. We decompose MI into different elements.
 {\footnotesize
 \begin{eqnarray*}
 MI &=& \mbox{Pure efficiency change} \times \mbox{Change in the scale
@@ -478,28 +602,43 @@ D^{VRS}_\mathbf{t_1}(x_\mathbf{t_2}, y_\mathbf{t_2})} {D^{CRS}_\mathbf{t_2}(x_%
 
 
 \frame[t] {
-Malmquist decomposition on our sample for several subperiods (Simar Wilson 1998,  Wheelock Wilson 1999)
-\bigskip
+Malmquist decomposition on our sample for several subperiods (Simar Wilson 1998,  Wheelock Wilson 1999)\\
+
+ \textbf{Change the subperiods, here 1 input ??}\\
+
 {\footnotesize
-\begin{tabular}{rrrrrrrrrrr}
+\begin{tabular}{rrrrrrrr}
   \hline
-    year1 & year2 & Malm & Pure Eff & Scale & Pure Tech & ScaleTech & N & n1 & n2 \\
+    year1 & year2 & Malm & Pure Eff & Scale & Pure Tech & ScaleTech  \\
   \hline
-   2002 & 2003 & 1.13 & 0.99 & 0.99 & 1.17 & 1.00 & 39 & 56 & 87 \\
-   2003 & 2004 & 1.27 & 0.96 & 0.90 & 1.31 & 1.12 & 57 & 87 & 71 \\
-   2004 & 2005 & 1.04 & 0.86 & 1.06 & 1.23 & 0.97 & 61 & 71 & 103 \\
-   2005 & 2006 & 1.11 & 1.23 & 1.08 & 0.96 & 0.94 & 59 & 103 & 68 \\
-   2006 & 2007 & 1.13 & 1.08 & 0.97 & 1.11 & 1.01 & 37 & 68 & 48 \\
-   2007 & 2008 & 1.30 & 0.96 & 0.98 & 1.06 & 1.01 & 27 & 48 & 46 \\ \hline
-   2002 & 2008 & 1.85 & 1.03 & 0.95 & 1.96 & 1.01 & 17 & 56 & 46 \\
+   2002 & 2003 & 1.13 & 0.99 & 0.99 & 1.17 & 1.00 \\
+   2003 & 2004 & 1.27 & 0.96 & 0.90 & 1.31 & 1.12 \\
+   2004 & 2005 & 1.04 & 0.86 & 1.06 & 1.23 & 0.97  \\
+   2005 & 2006 & 1.11 & 1.23 & 1.08 & 0.96 & 0.94  \\
+   2006 & 2007 & 1.13 & 1.08 & 0.97 & 1.11 & 1.01 \\
+   2007 & 2008 & 1.30 & 0.96 & 0.98 & 1.06 & 1.01 \\ \hline
+   2002 & 2008 & 1.85 & 1.03 & 0.95 & 1.96 & 1.01 \\
    \hline
 \end{tabular}
 }
 
 }
 
+\subsection{Conclusion \& todo list}
 
-
+\frame[t] {
+Conclusion : \\
+Lot of work remains (also on the data!)
+\begin{itemize}[<+->]
+  \item Order-m and $\alpha$-frontier difficult to interpret with sparse data and/or more than one input
+  \item[] $\rightarrow$ need of an input index.
+  \item Nice properties and easy to use (in 2-D)
+  \item Many questions for airlines industry :
+  \item[-] Seems to be evidence of technical progress  ?
+  \item[] $\rightarrow$ decomposition of productivity index could be done differently (see O'Donnell 2012).
+  \item Use conditional version of efficiency measure $\lambda(x, y|z)$ where $z$ could be a measure of airlines degree of competition.
+\end{itemize}
+}
 
 
 \end{document}
