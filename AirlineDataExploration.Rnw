@@ -7,7 +7,8 @@
 % 05/06/2013: integration du pooled frontier, qplots
 % 12/06/2013: Nouvelle definition du Y Yrevenue)
 %           : version 2-D avec K comme unique input
-% 13/06/2013: Am??lioration des statistqiues sur scores. Graphiques
+% 13/06/2013: Amelioration des statistqiues sur scores. Graphiques
+% 05/08/2013:  version modifi??e avec Steve (passage en log, fichier avec un seul input, test0...)
 
 \documentclass[a4paper]{article}
 
@@ -76,6 +77,8 @@ dim(dataall)
 Mydata <- data.frame(dataall)
 Mydata <- Mydata[with(Mydata, order(Region, year)), ]
 
+# Change in condtion
+Mydata$Test0 <- (Mydata$K>0 & Mydata$Y>0)*1
 # New unit for Y, K, E 
 # New definition of Y !!! (12/06/2013) 
 Mydata$Y <- Mydata$Yrevenue/1000
@@ -88,6 +91,13 @@ Mydata$YoverK <- Mydata$Y/Mydata$K
 Mydata$YoverL <- Mydata$Y/Mydata$L
 Mydata$YoverE <- Mydata$Y/Mydata$E
 Mydata$YoverM <- Mydata$Y/Mydata$M
+
+# New Definition 
+Mydata$Y <- log(Mydata$Y)
+Mydata$K <- log(Mydata$K)
+
+
+
 
 # identification LCC
 Mydata$Lcc <- 0
@@ -111,9 +121,9 @@ annee1=2002
 annee2=2005
 
 # Parameters 
-M.order<-50
+M.order<-20
 M.rep <-200
-alpha <- 0.97
+alpha <- 0.95
 
 @
 
@@ -598,7 +608,7 @@ plot(dataref.y$K,dataref.y$Y,  pch="+", col="darkblue",
 
 alphafrontier.2d(as.matrix(dataref.y$K),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = F, shade=F)
 
-dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="vrs", add= TRUE, 
+dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="fdh", add= TRUE, 
                   lty="dashed", col="blue", lwd=1)
 
 
@@ -623,7 +633,7 @@ plot(dataref.y$K,dataref.y$Y,  pch="+", col="darkblue",
 
 alphafrontier.2d(as.matrix(dataref.y$K),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = F, shade=F)
 
-dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="vrs", add= TRUE, 
+dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="fdh", add= TRUE, 
                   lty="dashed", col="blue", lwd=1)
 
 points(couple.o[,1],couple.o[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
@@ -663,7 +673,7 @@ plot(dataref.y$K,dataref.y$Y,  pch="+", col="darkblue",
 
 alphafrontier.2d(as.matrix(dataref.y$K),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = F, shade=F)
 
-dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="vrs", add= TRUE,
+dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="fdh", add= TRUE,
                   lty="dashed", col="blue", lwd=1)
 
 points(couple.o[,1],couple.o[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
@@ -693,7 +703,7 @@ plot(dataref.y$K,dataref.y$Y,  pch="+", col="darkblue",
 
 alphafrontier.2d(as.matrix(dataref.y$K),as.matrix(dataref.y$Y),type="output",alpha=alpha,col='green',lty=1,add=TRUE, confidence = F, shade=F)
 
-dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="vrs", add= TRUE, 
+dea.plot.frontier(dataref.y$K, dataref.y$Y, RTS="fdh", add= TRUE, 
                   lty="dashed", col="blue", lwd=1)
 
 points(couple.o[,1],couple.o[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=1)
@@ -708,58 +718,60 @@ rug(dataref.y$K, col = "grey")
 \clearpage
 
 \subsection{Statisitics for m and $\alpha$ -frontiers}
-
-<<echo=false,results=tex>>=
-annee =annee1
-# Calcul des efficacitis avec DEA, m-frontieres et alpha-frontieres 
-#DEA
-#Ici on prends dataref.all  <- QUE 2006
-
-dataref.y1 <- subset(Workdata,year==annee )  # <- QUE 2002
-nref.y1=nrow(dataref.y1)
-
-xref=matrix(c(dataref.y1$K,dataref.y1$L,dataref.y1$M),nrow=nref.y1,ncol=3)
-yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
-
-spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
-dataref.y1$DEA <-round(1/eff(spam), 3)
-
-spam1 <- Benchmarking::dea(X=xref, Y=yref, RTS="fdh", ORIENTATION="out")
-dataref.y1$FDH <-round(1/eff(spam1), 3)
-
-# M-frontier -  Scores output-oriented 
-
-spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
-dataref.y1$Mscore <- round(spam2$output, 3) 
-
-#alpha-frontiere
-
-foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
-dataref.y1$Ascore <-round(foo$output, 3)
-
-#Table
-Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs).")
-Mystats <-  list( "mean", "min", "median",  "max", "n", 
-                "$\\bar{Nb}_{Eff}$" = function(x){return(length(which(x==1)))},
-                "$\\bar{Nb}_{Super}$" = function(x){return(length(which(x >1)))}, 
-                "$\\bar{X}_{not}$" = function(x){
-                  toto <-subset(x, x<1)
-                  return(mean(toto))})
-Mylab <- "Monlabel"
-Myvars<- with(dataref.y1, data.frame( "DEA (vrs)" = dataref.y1$DEA,
-                                      "FDH" = dataref.y1$FDH,
-                                      "m-Frontier" = dataref.y1$Mscore,
-                                      "alpha-Frontier" = dataref.y1$Ascore
-                                       )                                                                                                                          
-                                      )
-tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
-
-@
+% 
+% <<echo=false,results=tex>>=
+% annee =annee1
+% # Calcul des efficacitis avec DEA, m-frontieres et alpha-frontieres 
+% #DEA
+% #Ici on prends dataref.all  <- QUE 2006
+% 
+% dataref.y1 <- subset(Workdata,year==annee )  # <- QUE 2002
+% nref.y1=nrow(dataref.y1)
+% 
+% xref=matrix(c(dataref.y1$K,dataref.y1$L,dataref.y1$M),nrow=nref.y1,ncol=3)
+% yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
+% 
+% spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
+% dataref.y1$DEA <-round(1/eff(spam), 3)
+% 
+% spam1 <- Benchmarking::dea(X=xref, Y=yref, RTS="fdh", ORIENTATION="out")
+% dataref.y1$FDH <-round(1/eff(spam1), 3)
+% 
+% # M-frontier -  Scores output-oriented 
+% 
+% spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
+% dataref.y1$Mscore <- round(spam2$output, 3) 
+% 
+% #alpha-frontiere
+% 
+% foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
+% dataref.y1$Ascore <-round(foo$output, 3)
+% 
+% #Table
+% Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs).")
+% Mystats <-  list( "mean", "min", "median",  "max", "n", 
+%                 "$\\bar{Nb}_{Eff}$" = function(x){return(length(which(x==1)))},
+%                 "$\\bar{Nb}_{Super}$" = function(x){return(length(which(x >1)))}, 
+%                 "$\\bar{X}_{not}$" = function(x){
+%                   toto <-subset(x, x<1)
+%                   return(mean(toto))})
+% Mylab <- "Monlabel"
+% Myvars<- with(dataref.y1, data.frame( "DEA (vrs)" = dataref.y1$DEA,
+%                                       "FDH" = dataref.y1$FDH,
+%                                       "m-Frontier" = dataref.y1$Mscore,
+%                                       "alpha-Frontier" = dataref.y1$Ascore
+%                                        )                                                                                                                          
+%                                       )
+% tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+% 
+% @
 
 <<echo=false,results=tex>>=
 
 # Calcul des efficacitis avec DEA, m-frontieres et alpha-frontieres 
 #DEA ONE 1 INPUT  
+dataref.y1 <- subset(Workdata,year==annee )  # <- QUE 2002
+nref.y1=nrow(dataref.y1)
 
 xref=matrix(c(dataref.y1$K),nrow=nref.y1,ncol=1)
 yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
@@ -795,48 +807,51 @@ tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab
 @
 
 %\clearpage
-
-<<echo=false,results=tex>>=
-annee =annee2
-# Calcul des efficacitis avec DEA, m-frontihres et alpha-frontieres 
-
-#DEA
-dataref.y2 <- subset(Workdata,year==annee )  
-nref.y2=nrow(dataref.y2)
-
-xref=matrix(c(dataref.y2$K,dataref.y2$L,dataref.y2$M),nrow=nref.y2,ncol=3)
-yref=matrix(c(dataref.y2$Y),nrow=nref.y2,ncol=1)
-
-spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
-dataref.y2$DEA <-round(1/eff(spam), 3)
-
-spam1 <- Benchmarking::dea(X=xref, Y=yref, RTS="fdh", ORIENTATION="out")
-dataref.y2$FDH <-round(1/eff(spam1), 3)
-
-# M-frontier 
-# Scores output-oriented 
-
-spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
-dataref.y2$Mscore <- round(spam2$output, 3) 
-
-#alpha-frontiere
-foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
-dataref.y2$Ascore <- round(foo$output, 3)
-
-#Table
-Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs).")
-Myvars<- with(dataref.y2, data.frame( "DEA (vrs)" = dataref.y2$DEA,
-                                      "FDH" = dataref.y2$FDH,
-                                      "m-Frontier" = dataref.y2$Mscore,
-                                      "alpha-Frontier" = dataref.y2$Ascore
-                                       )                                                                                                                          
-                                      )
-tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
-@
-
+% 
+% <<echo=false,results=tex>>=
+% annee =annee2
+% # Calcul des efficacitis avec DEA, m-frontihres et alpha-frontieres 
+% 
+% #DEA
+% dataref.y2 <- subset(Workdata,year==annee )  
+% nref.y2=nrow(dataref.y2)
+% 
+% xref=matrix(c(dataref.y2$K,dataref.y2$L,dataref.y2$M),nrow=nref.y2,ncol=3)
+% yref=matrix(c(dataref.y2$Y),nrow=nref.y2,ncol=1)
+% 
+% spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
+% dataref.y2$DEA <-round(1/eff(spam), 3)
+% 
+% spam1 <- Benchmarking::dea(X=xref, Y=yref, RTS="fdh", ORIENTATION="out")
+% dataref.y2$FDH <-round(1/eff(spam1), 3)
+% 
+% # M-frontier 
+% # Scores output-oriented 
+% 
+% spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
+% dataref.y2$Mscore <- round(spam2$output, 3) 
+% 
+% #alpha-frontiere
+% foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
+% dataref.y2$Ascore <- round(foo$output, 3)
+% 
+% #Table
+% Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs).")
+% Myvars<- with(dataref.y2, data.frame( "DEA (vrs)" = dataref.y2$DEA,
+%                                       "FDH" = dataref.y2$FDH,
+%                                       "m-Frontier" = dataref.y2$Mscore,
+%                                       "alpha-Frontier" = dataref.y2$Ascore
+%                                        )                                                                                                                          
+%                                       )
+% tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+% @
+% 
 
 <<echo=false,results=tex>>=
 # ONE INPUT (K)  
+annee =annee2
+dataref.y2 <- subset(Workdata,year==annee )  
+nref.y2=nrow(dataref.y2)
 
 xref=matrix(c(dataref.y2$K),nrow=nref.y2,ncol=1)
 yref=matrix(c(dataref.y2$Y),nrow=nref.y2,ncol=1)
@@ -879,7 +894,7 @@ spam <- cbind(dataref.y1$carrier, dataref.y1$carriername, dataref.y1$DEA,dataref
 
 spam <- spam[order(spam[, 6], decreasing =TRUE), ]
 
-foo2 <- xtable(spam[1:10,], digits=2, label ="Eff", caption = paste("50 first airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs), ",nrow(dataref.y1),"airlines (sorted by alpha-scores)."))
+foo2 <- xtable(spam[1:20,], digits=2, label ="Eff", caption = paste("50 first airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs), ",nrow(dataref.y1),"airlines (sorted by alpha-scores)."))
 
 names(foo2) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score")
 print(foo2, include.colnames=TRUE )
@@ -892,7 +907,7 @@ spam <- cbind(dataref.y1$carrier, dataref.y1$carriername, dataref.y1$DEA1, datar
 
 spam <- spam[order(spam[, 6], decreasing =TRUE), ]
 
-foo2 <- xtable(spam[1:10,], digits=2, label ="Eff", caption = paste("50 first airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(output oriented, 1 input), ",nrow(dataref.y1),"airlines (sorted by alpha-scores)."))
+foo2 <- xtable(spam[1:20,], digits=2, label ="Eff", caption = paste("50 first airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(output oriented, 1 input), ",nrow(dataref.y1),"airlines (sorted by alpha-scores)."))
 
 names(foo2) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score")
 print(foo2, include.colnames=TRUE )
@@ -910,7 +925,7 @@ spam <- spam[order(spam[, 6], decreasing =TRUE), ]
 #spam <- spam[order(   - dataref.y2$Mscore  - dataref.y2$Ascore - dataref.y2$DEA),]
 
 
-foo2 <- xtable(spam[1:10,], digits=2, label ="Eff", 
+foo2 <- xtable(spam[1:50,], digits=2, label ="Eff", 
                caption = paste("50 first airlines efficiency, year",annee2,", 
                             m=",M.order,", alpha = ", alpha,"(output oriented, 4 inputs), 
                                ",nrow(dataref.y2),"airlines, (sorted by alpha-scores)."))
@@ -929,7 +944,7 @@ spam <- spam[order(spam[, 6], decreasing =TRUE), ]
 #spam <- spam[order(   - dataref.y2$Mscore  - dataref.y2$Ascore - dataref.y2$DEA),]
 
 
-foo2 <- xtable(spam[1:10,], digits=2, label ="Eff", 
+foo2 <- xtable(spam[1:50,], digits=2, label ="Eff", 
                caption = paste("50 first airlines efficiency, year",annee2,", 
                             m=",M.order,", alpha = ", alpha,"(output oriented, 1 input), 
                                ",nrow(dataref.y2),"airlines, (sorted by alpha-scores)."))
@@ -937,7 +952,7 @@ foo2 <- xtable(spam[1:10,], digits=2, label ="Eff",
 names(foo2) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score")
 print(foo2, include.colnames=TRUE)
 @
-
+\clearpage
 
 
 \section{Dynamic Analysis}
@@ -955,8 +970,8 @@ We propose to compute the efficiency (resp. m-efficiency and $\alpha$-efficiency
 
 \clearpage
 
-\subsection{Contemporaneous efficiencies 1 seul input (11/06/13)}
-
+\subsection{Contemporaneous efficiencies (1 or 4 inputs !)}
+% IL Y a 3 changements ` faire : 1 ici et 2 pour la Pooled frontiere (1 pour xref, 1 pour xobs)
 <<echo=FALSE, results=hide>>=
 ## Scores par an sur  frontieres contemporaines     
 Workdata <-subset(Mydata, Test0 > 0)
@@ -979,9 +994,11 @@ for (i in 1:length(x)) {
     dataref <- subset(Workdata, year==x[i])   #<- firmes de l'annie courante 
     nref=nrow(dataref)
     # 4 inputs  !!!
-    # xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
+    #xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
+    
      # 1 seul input (K!!!)
     xref=matrix(c(dataref$K),nrow=nref,ncol=1)
+    Ninput=ncol(xref)
     
     yref=matrix(c(dataref$Y),nrow=nref,ncol=1)
 
@@ -1030,7 +1047,7 @@ colors <- rainbow(length(unique(Workdata$year)))
 boxplot(score.dea.cont[,2]~score.dea.cont[,1], 
         main = "Airlines efficiency on contemporaneous DEA-frontier", 
         col=colors, 
-        sub = paste(" Computed on all available airlines (2002-2008)"),  
+        sub = paste(" Computed for 2002-2008, with",Ninput,"inputs"),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -1052,7 +1069,7 @@ abline(h = 1, col = "red",  lwd=2)
 boxplot(score.fdh.cont[,2]~score.fdh.cont[,1], 
         main = "Airlines efficiency on contemporaneous FDH-frontier", 
         col=colors, 
-        sub = paste(" Computed on all available airlines (2002-2008)"),  
+        sub = paste(" Computed for 2002-2008, with",Ninput,"inputs"), 
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -1074,7 +1091,7 @@ abline(h = 1, col = "red",  lwd=2)
 boxplot(score.m.cont[,2]~score.m.cont[,1], 
         main = "Airlines efficiency on contemporaneous order-m frontier", 
         col=colors, 
-        sub = paste(" Computed on all available airlines (2002-2008), m=", M.order,"."), 
+        sub = paste(" Computed for 2002-2008, with",Ninput,"inputs, m=", M.order,"."), 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
 @
@@ -1095,7 +1112,7 @@ abline(h = 1, col = "red",  lwd=2)
 boxplot(score.alpha.cont[,2]~score.alpha.cont[,1], 
         main = "Airlines efficiency on contemporaneous alpha frontier", 
         col=colors, 
-        sub = paste(" Computed on all available airlines (2002-2008), alpha =",alpha,"."),  
+         sub = paste(" Computed for 2002-2008, with",Ninput,"inputs, alpha =",alpha,"."),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -1135,9 +1152,12 @@ dataref <- subset(Workdata)  # <- frontiere toutes annees
 nref=nrow(dataref)
 
  # 4 inputs  !!!
-# xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
+ #xref=matrix(c(dataref$K,dataref$L,dataref$E,dataref$M),nrow=nref,ncol=4)
+
  # 1 seul input (K!!!)
-    xref=matrix(c(dataref$K),nrow=nref,ncol=1)
+ xref=matrix(c(dataref$K),nrow=nref,ncol=1)
+
+Ninput=ncol(xref)
 
 yref=matrix(c(dataref$Y),nrow=nref,ncol=1)
 
@@ -1146,8 +1166,9 @@ for (i in 1:length(x)) {
     dataobs <- subset(Workdata,year==x[i])   #<- firmes de l'annie courante 
     nobs=nrow(dataobs)
     # 4 inputs
-    # xobs=matrix(c(dataobs$K,dataobs$L,dataobs$E, dataobs$M),nrow=nobs,ncol=4)
-     # 1 seul input (K) !! inputs
+    #xobs=matrix(c(dataobs$K,dataobs$L,dataobs$E, dataobs$M),nrow=nobs,ncol=4)
+    
+    # 1 seul input (K) !! inputs
     xobs=matrix(c(dataobs$K),nrow=nobs,ncol=1)
     
     yobs=matrix(c(dataobs$Y),nrow=nobs,ncol=1)
@@ -1198,7 +1219,8 @@ score.alpha$y <- as.factor(score.alpha$y)
 boxplot(score.dea[,2]~score.dea[,1], 
         main = "Airlines efficiency on DEA- frontier (Pooled Set)", 
         col=colors, 
-        sub = paste(" DEA frontier computed using ", nref, "airlines (2002-2008)"),  
+        sub = paste(" DEA frontier computed using ", nref, 
+                    "airlines  and",Ninput,"inputs"),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -1223,6 +1245,8 @@ abline(h = 1, col = "red",  lwd=2)
 boxplot(score.fdh[,2]~score.fdh[,1], 
         col=colors, 
         main = "Airlines efficiency  on FDH frontier (Pooled Set)", 
+         sub = paste(" FDH frontier computed using ", nref, 
+                    "airlines and",Ninput,"inputs"),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -1247,7 +1271,8 @@ abline(h = 1, col = "red",  lwd=2)
 boxplot(score.m[,2]~score.m[,1], 
         main = "Airlines efficiency on order-m frontier (Pooled Set)", 
         col=colors, 
-        sub = paste(" m-frontier computed on ", nref, "airlines (2002-2008), m=", M.order,"."),  
+        sub = paste(" m-frontier computed on ", nref, 
+                    "airlines on",Ninput,"inputs, m=", M.order,"."),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -1271,7 +1296,8 @@ abline(h = 1, col = "red",  lwd=2)
 boxplot(score.alpha[,2]~score.alpha[,1], 
         main = "Airlines efficiency on alpha-frontier (Pooled Set)", 
         col=colors, 
-        sub = paste(" alpha-frontier computed on ", nref, "airlines (2002-2008), alpha=", alpha,"."),  
+        sub = paste(" alpha-frontier computed on ", nref,
+                    "airlines on",Ninput,"inputs, alpha=", alpha,"."),  
         ylab = "Efficiency (output oriented)", 
         xlab = "Years ", outline =FALSE)
 abline(h = 1, col = "red",  lwd=2)
@@ -1339,7 +1365,7 @@ Malmquist decomposition proposed by Simar \& Wilson (1998) \&  Wheelock \& Wilso
 \smallskip
 
 where $D^{CRS}_t(x,y)$ incorporates  the assumption of \textit{Constant} Return to Scale (CRS), while $D^{VRS}_t(x,y)$ incorporates  the assumption of \textit{Variable} Return to Scale (VRS).\\
-% 
+
 % 
 % <<echo=FALSE, results=hide>>=
 % # definiton of elements 
@@ -1350,7 +1376,7 @@ where $D^{CRS}_t(x,y)$ incorporates  the assumption of \textit{Constant} Return 
 % i2 <-c(i2,1900, 2005, 2008, 2008)
 % 
 % #---------------------------------------------
-% ## III: Calcul des indisces DE Malmqvuist(Simar-Wilson 1998 ; Wheelock-Wilson, 1999)
+% ## III: Calcul des indices DE Malmqvuist(Simar-Wilson 1998 ; Wheelock-Wilson, 1999)
 % table.malm.ww <-data.frame(toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0)) 
 % 
 % for (k in 1:length(i1)) {
@@ -1464,99 +1490,99 @@ annee =2006
 
 We compare the ranking given by FDH estimator and those given $\alpha$-frontier estimator  and M-estimator for $\alpha$ = \Sexpr{alpha}  and M = \Sexpr{M.order} for year \Sexpr{annee} and for the \Sexpr{nrow(subset(Workdata,year==annee ))} observation of that year. 
 
-
-<<echo=FALSE, results=hide>>=
-# Calcul des efficacites avec FDF, DEA, m-frontieres et alpha-frontieres 
-#DEA
-
-dataref.y1 <- subset(Workdata,year==annee )  # <- QU'Une annee
-nref.y1=nrow(dataref.y1)
-
-xref=matrix(c(dataref.y1$K,dataref.y1$L,dataref.y1$M),nrow=nref.y1,ncol=3)
-yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
-
-#FDH -  Scores output-oriented 
-spam0 <- Benchmarking::dea(X=xref, Y=yref, RTS="fdh", ORIENTATION="out")
-dataref.y1$FDH <-round(1/eff(spam0), 3)
-
-#DEA -  Scores output-oriented 
-spam1 <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
-dataref.y1$DEA <-round(1/eff(spam1), 3)
-
-
-# M-frontier -  Scores output-oriented 
-spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
-dataref.y1$Mscore <- round(spam2$output, 3) 
-
-#alpha-frontiere
-foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
-dataref.y1$Ascore <-round(foo$output, 3)
-
-foo <- data.frame("Name" = dataref.y1$carriername, 
-                  "Y"= dataref.y1$Y, 
-                  "FDH"= dataref.y1$FDH,
-                  "DEA"= dataref.y1$DEA, 
-                  "Mscore"= dataref.y1$Mscore, 
-                  "Ascore"=dataref.y1$Ascore)
-
-
-#tri des donnees 
-foo <-  foo[with(foo, order(-FDH, -Y)), ]
-# Creation des rankings FDH
-foo <-transform(foo,  FDH.rank = rank(-FDH, ties.method = "first"))
-
-
-#tri des donnees 
-foo <-  foo[with(foo, order(-DEA, -Y)), ]
-# Creation des rankings DEA
-foo <-transform(foo,  DEA.rank = rank(-DEA, ties.method = "first"))
-
-#tri des donnees 
-foo <-  foo[with(foo, order(-Mscore, -Y)), ]
-# Creation des rankings Mscore
-foo <-transform(foo,  M.rank = rank(-Mscore, ties.method = "first"))
-
-#tri des donnees (on evite les ex-aequo)
-foo <-  foo[with(foo, order(-Ascore, -Y)), ]
-# Creation des rankings Alpha
-foo <-transform(foo,  A.rank = rank(-Ascore, ties.method = "first"))
-
-@
-
-<<echo=FALSE, results=hide, fig=TRUE >>=
-res0 <- data.frame(foo[,c(7, 8, 9, 10)])
-p0 <- ggpcp(res0,xlab="bgbg",ylab="byby")
-
-print(p0 + geom_line() + 
-         scale_y_continuous('Airlines ranking (DEA)',
-                            breaks=c(0,.5,1), labels=c("Last", "Median", "Best")))
-
-@
+% 
+% <<echo=FALSE, results=hide>>=
+% # Calcul des efficacites avec FDF, DEA, m-frontieres et alpha-frontieres 
+% #DEA
+% 
+% dataref.y1 <- subset(Workdata,year==annee )  # <- QU'Une annee
+% nref.y1=nrow(dataref.y1)
+% 
+% xref=matrix(c(dataref.y1$K,dataref.y1$L,dataref.y1$M),nrow=nref.y1,ncol=3)
+% yref=matrix(c(dataref.y1$Y),nrow=nref.y1,ncol=1)
+% 
+% #FDH -  Scores output-oriented 
+% spam0 <- Benchmarking::dea(X=xref, Y=yref, RTS="fdh", ORIENTATION="out")
+% dataref.y1$FDH <-round(1/eff(spam0), 3)
+% 
+% #DEA -  Scores output-oriented 
+% spam1 <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="out")
+% dataref.y1$DEA <-round(1/eff(spam1), 3)
+% 
+% 
+% # M-frontier -  Scores output-oriented 
+% spam2 <- ordermscore(xref, yref, xeval=xref, yeval=yref, m=M.order)
+% dataref.y1$Mscore <- round(spam2$output, 3) 
+% 
+% #alpha-frontiere
+% foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
+% dataref.y1$Ascore <-round(foo$output, 3)
+% 
+% foo <- data.frame("Name" = dataref.y1$carriername, 
+%                   "Y"= dataref.y1$Y, 
+%                   "FDH"= dataref.y1$FDH,
+%                   "DEA"= dataref.y1$DEA, 
+%                   "Mscore"= dataref.y1$Mscore, 
+%                   "Ascore"=dataref.y1$Ascore)
+% 
+% 
+% #tri des donnees 
+% foo <-  foo[with(foo, order(-FDH, -Y)), ]
+% # Creation des rankings FDH
+% foo <-transform(foo,  FDH.rank = rank(-FDH, ties.method = "first"))
+% 
+% 
+% #tri des donnees 
+% foo <-  foo[with(foo, order(-DEA, -Y)), ]
+% # Creation des rankings DEA
+% foo <-transform(foo,  DEA.rank = rank(-DEA, ties.method = "first"))
+% 
+% #tri des donnees 
+% foo <-  foo[with(foo, order(-Mscore, -Y)), ]
+% # Creation des rankings Mscore
+% foo <-transform(foo,  M.rank = rank(-Mscore, ties.method = "first"))
+% 
+% #tri des donnees (on evite les ex-aequo)
+% foo <-  foo[with(foo, order(-Ascore, -Y)), ]
+% # Creation des rankings Alpha
+% foo <-transform(foo,  A.rank = rank(-Ascore, ties.method = "first"))
+% 
+% @
+% 
+% <<echo=FALSE, results=hide, fig=TRUE >>=
+% res0 <- data.frame(foo[,c(7, 8, 9, 10)])
+% p0 <- ggpcp(res0,xlab="bgbg",ylab="byby")
+% 
+% print(p0 + geom_line() + 
+%          scale_y_continuous('Airlines ranking (DEA)',
+%                             breaks=c(0,.5,1), labels=c("Last", "Median", "Best")))
+% 
+% @
 
 We compare the ranking given by FDH estimator and those given by the $m$-frontier estimator for $m$ = \Sexpr{M.order}. 
 
-
-<<echo=FALSE, results=hide, fig=TRUE >>=
-res1 <- data.frame(foo[,c(7,9)])
-p1 <- ggpcp(res1,xlab="bgbg",ylab="byby")
-
-print(p1 + geom_line() + 
-         scale_y_continuous('Airlines ranking (DEA)',
-                            breaks=c(0,.5,1), labels=c("Last", "Median", "Best")))
-
-@
+% 
+% <<echo=FALSE, results=hide, fig=TRUE >>=
+% res1 <- data.frame(foo[,c(7,9)])
+% p1 <- ggpcp(res1,xlab="bgbg",ylab="byby")
+% 
+% print(p1 + geom_line() + 
+%          scale_y_continuous('Airlines ranking (DEA)',
+%                             breaks=c(0,.5,1), labels=c("Last", "Median", "Best")))
+% 
+% @
 
 We compare the ranking given by FDH estimator and those given by the $\alpha$-frontier estimator for $\alpha$ = \Sexpr{alpha}. 
-
-<<echo=FALSE, results=hide, fig=TRUE >>=
-res2 <- data.frame(foo[,c(7,10)])
-p2 <- ggpcp(res2,xlab="bgbg",ylab="byby")
-
- print(p2 + geom_line() + 
-         scale_y_continuous('Airlines ranking (DEA)',
-                            breaks=c(0,.5,1), labels=c("Last", "Median", "Best")))
-
-@
+% 
+% <<echo=FALSE, results=hide, fig=TRUE >>=
+% res2 <- data.frame(foo[,c(7,10)])
+% p2 <- ggpcp(res2,xlab="bgbg",ylab="byby")
+% 
+%  print(p2 + geom_line() + 
+%          scale_y_continuous('Airlines ranking (DEA)',
+%                             breaks=c(0,.5,1), labels=c("Last", "Median", "Best")))
+% 
+% @
 
 %Essais en tous genres...
 
@@ -1566,7 +1592,6 @@ p2 <- ggpcp(res2,xlab="bgbg",ylab="byby")
 
 x=seq(2002, 2008, by=1)  
 nbtemp=length(x)
-
 
 score.DEA <- data.frame(toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0), toto=numeric(0)) 
     
