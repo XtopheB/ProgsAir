@@ -30,8 +30,8 @@ rm(list=ls())
 
 ## Second change the working directory
 
-setwd("D:/progs/Air/progs")   
-#setwd("C:/Chris/zprogs/Air/progs")   
+#setwd("D:/progs/Air/progs")   
+setwd("C:/Chris/zprogs/Air/progs")   
 
 
 library(Hmisc)  #  <- Misc. statistiques descriptives  
@@ -114,9 +114,11 @@ alpha <- 0.95
 
 
 \section{Data}
-We are looking at the file \textbf{\Sexpr{fichier}},  we have \textbf{\Sexpr{nrow(dataall)}} observations and \textbf{\Sexpr{ncol(dataall)}} variables over \Sexpr{length(unique(Mydata$year))} years. We found \textbf{\Sexpr{length(unique(Mydata$carrier))}} different carriers in the database.\\
+We are looking at the file \textbf{\Sexpr{fichier}},  we have \textbf{\Sexpr{nrow(dataall)}} observations and \textbf{\Sexpr{ncol(dataall)}} variables over \Sexpr{length(unique(Mydata$year))} years in the main file.  We found \textbf{\Sexpr{length(unique(dataall$carrier))}} different carriers in the main database.\\
 
-We should emphasize that only \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0, select= c(carrier))))}} carriers  have \textbf{all} production variables (i.e. Y, K, L E \& M not null)  at least one year (based on "Test0" variable). Here the $Y$ variable is $Yrevenue$.
+We restrict the file to observation which satisfy $K>0$ and $Y>0$; On this file we have \textbf{\Sexpr{length(unique(Mydata$carrier))}} different carriers and \textbf{\Sexpr{nrow(dataall)}} observations  \\
+
+% We should emphasize that only \textbf{\Sexpr{nrow(unique(subset(Mydata, Test0 >0, select= c(carrier))))}} carriers  
 
 % Table des effectifs
 <<echo=FALSE, results=hide, label=Effectifs>>=
@@ -146,22 +148,21 @@ for (i in 1:length(x)) {
 names(table.data) <- c("Year", "N", "N.Complete", "N.Big", "N.Big.Complete")
 foo <- xtable(table.data, 
                 caption =paste("The total nb of obs. is",nrow(Mydata),", for",
-                             nrow(unique(subset(Mydata, select= c(carrier)))),"unique and ",
-                             nrow(unique(subset(Mydata, Test0 >0, select= c(carrier)))), 
-                             "complete airlines."), align = "ll|cccc")
+                             nrow(unique(subset(Mydata, select= c(carrier)))),
+                               "unique and complete airlines."), align = "ll|cccc")
 digits(foo)[c(2:6)] <- 0
 print(foo)
 @
 
 
 \subsection{Framework}
-We base our analysis on two type subsets of airlines: The whole sample and the sample reduced to majors airlines\footnote{major airlines are defined as having an output greater than the third quuartile of $Y$. See section \ref{Majors} }. We choose \Sexpr{annee1} and  \Sexpr{annee2} to be 2 years of reference in our analysis. These values are parameter of the program and may be changed anytime. We also spoted the LCC when possible. \\
+We base our analysis on two type subsets of airlines: The whole sample and the sample reduced to majors airlines\footnote{Major airlines are defined as having an output greater than the third quartile of $Y$. See section \ref{Majors} }. We choose \Sexpr{annee1} and  \Sexpr{annee2} to be 2 years of reference in our analysis. These values are parameter of the program and may be changed anytime. We also spoted the LCC when possible. \\
 
 
 \subsection{Definition of variables}
 
-\subsection{Descriptive statistics}
- The number of complete observations is of \textbf{\Sexpr{nrow(unique(subset(Mydata, year == annee2, select= c(carrier))))}} carriers for \Sexpr{annee2}. Below is a partial overview of the file's production variables for those \textbf{fully} observable airlines those 2 years.
+\subsection{Descriptive statistics  for \Sexpr{annee1} and \Sexpr{annee2} }
+ The number of complete observations is of \textbf{\Sexpr{nrow(unique(subset(Mydata, year == annee1, select= c(carrier))))}} carriers for \Sexpr{annee1} ( resp \textbf{\Sexpr{nrow(unique(subset(Mydata, year == annee2, select= c(carrier))))}}  for \Sexpr{annee2}). Below is a partial overview of the file's production variables for those \textbf{fully} observable airlines those 2 years.
 
 
 <<echo=false,results=tex, label=StatDes>>=
@@ -331,7 +332,7 @@ foo.y2 <- ineq(Mydata.y2$Y,type="Gini")
 
 @
 
-The Gini index equals \textbf{\Sexpr{round(foo.y1, 3)}} in \Sexpr{annee1} and \textbf{\Sexpr{round(foo.y2,3)}} in \Sexpr{annee2}. The Lorentz curves below show the distribution of output over the the industry for these years.\footnote{It shows for any \% of firms (x axis), what percentage  (y axis) of the total output they produce.}
+The Gini index equals \textbf{\Sexpr{round(foo.y1, 3)}} in \Sexpr{annee1} and \textbf{\Sexpr{round(foo.y2,3)}} in \Sexpr{annee2}. We removed the Lorentz curves showing the distribution of output over the the industry for these years.\footnote{It shows for any \% of firms (x axis), what percentage  (y axis) of the total output they produce.}
 
 <<fig=FALSE,echo=false, label=Lorentz>>=
 
@@ -343,18 +344,7 @@ legend("topleft",legend=c(paste("in",annee1), paste("in",annee2)),lty=1:2,col=c(
 
 @
 
-\clearpage
-
 \section{Productivity \& efficency in \Sexpr{annee1} and \Sexpr{annee2} }
-
-\subsection{Can we consider that the technology is the same for ``big'' and ``small'' airlines in the industry}
-
-\textbf{Todo}
-\begin{itemize}
-  \item NP distribution of Y, K, L, M 
-  \item Comparing distribution of big airlines efficiency relative to frontier constructed with or without small airlines
-  \item Airline industry evidence ? definition of output, etc...
-\end{itemize}
 
 
 << echo=FALSE, results=hide, fig=TRUE, label=QQDistY>>=
@@ -368,13 +358,13 @@ qplot(Y, data=plot.data,  geom="density", fill=year, alpha=I(.5),
 @
 
 
-
 \subsection{FDH, m-frontiers \& $\alpha$-frontier in \Sexpr{annee1} and \Sexpr{annee2}}
 
 We compute below the $\alpha$-frontier with only one input ($K$, here) and one output and graph it for \Sexpr{annee1} (\textbf{\Sexpr{nrow(subset(Mydata, Test0 >0 & year==annee1))}} obs.) and \Sexpr{annee2} (\textbf{\Sexpr{nrow(subset(Mydata, Test0 >0 & year==annee2))}} obs.).\\
 
 We decide to work in the \textbf{input-oriented} framework
 
+\subsubsection{In \Sexpr{annee1}}
 
 <<fig=TRUE,echo=FALSE, label=Frontiers1>>=
 annee <-annee1
@@ -382,7 +372,6 @@ Workdata <-subset(Mydata, Test0 > 0)
 dataref <- subset(Workdata,year==annee )
 #dataref <- Workdata   # si on veut tout ensemble
 datalcc <-subset(Workdata,year==annee & Lcc > 0) 
-
 
 # bornes  
 BorneSup <-0.75
@@ -392,14 +381,15 @@ borney <- quantile(dataref$Y,probs=c(BorneSup))
 # M-Scores avec Frontiles  
 scoreM <- ordermscore(as.matrix(dataref$K),as.matrix(dataref$Y), m=M.order)
 
-# We need to construct the frontier..
+# We need to construct the order-m frontier..
+
 # cas output-oriented
 # couple.o <-cbind(dataref$K, dataref$Y/scoreM$output)
 # couple.o <- couple.o[order( couple.o[,1],couple.o[,2]),]
 
 # cas input-oriented
-couple.o <-cbind(dataref$K*scoreM$input, dataref$Y)
-couple.o <- couple.o[order( couple.o[,1],couple.o[,2]),]
+couple.i <-cbind(dataref$K*scoreM$input, dataref$Y)
+couple.i <- couple.i[order( couple.i[,1],couple.i[,2]),]
 
 # Plots 
 plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
@@ -409,21 +399,21 @@ plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
 )
 #Alpha-Frontier
 alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="input",alpha=alpha,
-                 col='green',lty=1,add=TRUE, confidence = F, shade=F)
+                 col='green',lty=1,lwd=2, add=TRUE, confidence = F, shade=F)
 #FDH
 dea.plot.frontier(dataref$K, dataref$Y, RTS="fdh", add= TRUE, 
-                  lty="dashed", col="blue", lwd=1)
+                  lty="dashed", col="blue", lwd=2)
 
 #Order-m frontier ( AVERIFIER !!!)
-dea.plot.frontier(couple.o[,1],couple.o[,2], RTS="fdh", add= TRUE, 
-                  lty="dashed", col="purple", lwd=1)
-# points(couple.o[,1],couple.o[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
+dea.plot.frontier(couple.i[,1],couple.i[,2], RTS="fdh", add= TRUE, 
+                  lty=1, col="purple", lwd=2)
+# points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
 
 points(datalcc$K,datalcc$Y,  pch=19, col="red")
-textxy(dataref$K,dataref$Y, dataref$carrier)
+textxy(dataref$K,dataref$Y, dataref$carrier, dcol="darkgrey", cx = 0.6)
 rug(dataref$K, col = "grey")
 
-legend("topleft",legend=c( "FDH","alpha-frontier", "m-frontier", "LCC"),lty=c(2,1,2,9),col=c(  "blue","green", "purple", "red"))
+legend("topleft",legend=c( "FDH","alpha-frontier", "m-frontier", "LCC"),lty=c(2,1,1,9),col=c(  "blue","green", "purple", "red"))
 @
 
 Zoom under the \Sexpr{BorneSup} quantile...
@@ -436,24 +426,26 @@ plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
       main=paste(" Frontiers (input-oriented) in", annee),
      sub=paste("alpha=",alpha," M=",M.order,"(Zoom under the", BorneSup,"quantile)" ))
 #Alpha
-alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="input",alpha=alpha,col='green',lty=1,add=TRUE, confidence = F, shade=F)
+alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),
+                 type="input",alpha=alpha,col='green',lty=1,lwd=2,
+                 add=TRUE, confidence = F, shade=F)
 #FDH
 dea.plot.frontier(dataref$K, dataref$Y, RTS="fdh", add= TRUE, 
-                  lty="dashed", col="blue", lwd=1)
+                  lty="dashed", col="blue", lwd=2)
 
 #Order-m frontier ( AVERIFIER !!!)
-dea.plot.frontier(couple.o[,1],couple.o[,2], RTS="fdh", add= TRUE, 
-                  lty="dashed", col="purple", lwd=1)
-# points(couple.o[,1],couple.o[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
+dea.plot.frontier(couple.i[,1],couple.i[,2], RTS="fdh", add= TRUE, 
+                  lty=1, col="purple", lwd=2)
+# points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
 
 points(datalcc$K,datalcc$Y,  pch=19, col="red")
-textxy(dataref$K,dataref$Y, dataref$carrier)
+textxy(dataref$K,dataref$Y, dataref$carrier, dcol="darkgrey", cx = 0.6)
 rug(dataref$K, col = "grey")
 
 #legend("topleft",legend=c( "DEA VRS","alpha-frontier", "m-frontier", "LCC"),lty=c(2,1,2,9),col=c(  "blue","green", "purple", "red"))
 @
 
-\clearpage
+\subsubsection{In \Sexpr{annee2}}
 
 <<fig=TRUE,echo=FALSE, label=Frontiers2>>=
 annee <-annee2
@@ -461,7 +453,6 @@ Workdata <-subset(Mydata, Test0 > 0)
 dataref <- subset(Workdata,year==annee )
 #dataref <- Workdata   # si on veut tout ensemble
 datalcc <-subset(Workdata,year==annee & Lcc > 0) 
-
 
 # bornes  
 BorneSup <-0.75
@@ -471,14 +462,15 @@ borney <- quantile(dataref$Y,probs=c(BorneSup))
 # M-Scores avec Frontiles  
 scoreM <- ordermscore(as.matrix(dataref$K),as.matrix(dataref$Y), m=M.order)
 
-# We need to construct the frontier..
+# We need to construct the order-m frontier..
+
 # cas output-oriented
 # couple.o <-cbind(dataref$K, dataref$Y/scoreM$output)
 # couple.o <- couple.o[order( couple.o[,1],couple.o[,2]),]
 
 # cas input-oriented
-couple.o <-cbind(dataref$K*scoreM$input, dataref$Y)
-couple.o <- couple.o[order( couple.o[,1],couple.o[,2]),]
+couple.i <-cbind(dataref$K*scoreM$input, dataref$Y)
+couple.i <- couple.i[order( couple.i[,1],couple.i[,2]),]
 
 # Plots 
 plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
@@ -488,24 +480,24 @@ plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
 )
 #Alpha-Frontier
 alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="input",alpha=alpha,
-                 col='green',lty=1,add=TRUE, confidence = F, shade=F)
+                 col='green',lty=1,lwd=2, add=TRUE, confidence = F, shade=F)
 #FDH
 dea.plot.frontier(dataref$K, dataref$Y, RTS="fdh", add= TRUE, 
-                  lty="dashed", col="blue", lwd=1)
+                  lty="dashed", col="blue", lwd=2)
 
 #Order-m frontier ( AVERIFIER !!!)
-dea.plot.frontier(couple.o[,1],couple.o[,2], RTS="fdh", add= TRUE, 
-                  lty="dashed", col="purple", lwd=1)
-# points(couple.o[,1],couple.o[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
+dea.plot.frontier(couple.i[,1],couple.i[,2], RTS="fdh", add= TRUE, 
+                  lty=1, col="purple", lwd=2)
+# points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
 
 points(datalcc$K,datalcc$Y,  pch=19, col="red")
-textxy(dataref$K,dataref$Y, dataref$carrier)
+textxy(dataref$K,dataref$Y, dataref$carrier, dcol="darkgrey", cx = 0.6)
 rug(dataref$K, col = "grey")
 
-legend("topleft",legend=c( "FDH","alpha-frontier", "m-frontier", "LCC"),lty=c(2,1,2,9),col=c(  "blue","green", "purple", "red"))
+legend("bottomright",legend=c( "FDH","alpha-frontier", "m-frontier", "LCC"),lty=c(2,1,1,9),col=c(  "blue","green", "purple", "red"))
 @
 
-Zoom under the \Sexpr{BorneSup} quantile for year \Sexpr{annee} ...
+Zoom under the \Sexpr{BorneSup} quantile...
 
 <<fig=TRUE,echo=FALSE>>=
 
@@ -514,25 +506,119 @@ plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
      ylab="Y", xlab= "K",
       main=paste(" Frontiers (input-oriented) in", annee),
      sub=paste("alpha=",alpha," M=",M.order,"(Zoom under the", BorneSup,"quantile)" ))
-#ALPHA
-alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="input",alpha=alpha,col='green',lty=1,add=TRUE, confidence = F, shade=F)
+#Alpha
+alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),
+                 type="input",alpha=alpha,col='green',lty=1,lwd=2,
+                 add=TRUE, confidence = F, shade=F)
 #FDH
 dea.plot.frontier(dataref$K, dataref$Y, RTS="fdh", add= TRUE, 
-                  lty="dashed", col="blue", lwd=1)
+                  lty="dashed", col="blue", lwd=2)
 
 #Order-m frontier ( AVERIFIER !!!)
-dea.plot.frontier(couple.o[,1],couple.o[,2], RTS="fdh", add= TRUE, 
-                  lty="dashed", col="purple", lwd=1)
-#points(couple.o[,1],couple.o[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
+dea.plot.frontier(couple.i[,1],couple.i[,2], RTS="fdh", add= TRUE, 
+                  lty=1, col="purple", lwd=2)
+# points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
 
-#Points...
 points(datalcc$K,datalcc$Y,  pch=19, col="red")
-textxy(dataref$K,dataref$Y, dataref$carrier)
+textxy(dataref$K,dataref$Y, dataref$carrier, dcol="darkgrey", cx = 0.6)
 rug(dataref$K, col = "grey")
 
 #legend("topleft",legend=c( "DEA VRS","alpha-frontier", "m-frontier", "LCC"),lty=c(2,1,2,9),col=c(  "blue","green", "purple", "red"))
 @
 
+\clearpage
+\subsection{Graphical comparison input-output}
+
+<<fig=TRUE,echo=FALSE, label=FrontiersComp-A>>=
+annee <-annee1
+Workdata <-subset(Mydata, Test0 > 0)  
+dataref <- subset(Workdata,year==annee )
+
+# Plots 
+plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
+      ylab="Y", xlab= "K",
+     main=paste(" Alpha Frontiers (Output vs input-oriented) in", annee),
+     sub=paste(nrow(dataref),"Airlines (alpha=",alpha," M=",M.order,")" )
+)
+#Alpha-Frontier INPUT
+alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="input",alpha=alpha,
+                 col='green',lty=1, lwd=2, add=TRUE, confidence = F, shade=F)
+
+alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="output",alpha=alpha,
+                 col='brown',lty=1,lwd=2, add=TRUE, confidence = F, shade=F)
+
+#FDH
+dea.plot.frontier(dataref$K, dataref$Y, RTS="fdh", add= TRUE, 
+                  lty="dashed", col="blue", lwd=1)
+
+legend("topleft",legend=c( "FDH","alpha (Input)", "alpha (Output)"),lty=c(2,1,1),col=c(  "blue","green", "brown"))
+@
+
+<<fig=TRUE,echo=FALSE, label=FrontiersComp-M>>=
+# We need to construct the order-m frontier..
+# M-Scores avec Frontiles  
+scoreM <- ordermscore(as.matrix(dataref$K),as.matrix(dataref$Y), m=M.order)
+# cas output-oriented
+ couple.o <-cbind(dataref$K, dataref$Y/scoreM$output)
+ couple.o <- couple.o[order( couple.o[,1],couple.o[,2]),]
+
+# cas input-oriented
+couple.i <-cbind(dataref$K*scoreM$input, dataref$Y)
+couple.i <- couple.i[order( couple.i[,1],couple.i[,2]),]
+
+
+# Plots 
+plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
+      ylab="Y", xlab= "K",
+     main=paste(" Order-m Frontiers (Output vs input-oriented) in", annee),
+     sub=paste(nrow(dataref),"Airlines (alpha=",alpha," M=",M.order,")" )
+)
+
+
+#Order-m frontier Input 
+dea.plot.frontier(couple.i[,1],couple.i[,2], RTS="fdh", add= TRUE, 
+                  lty=1, col="purple", lwd=2)
+# points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
+
+dea.plot.frontier(couple.o[,1],couple.o[,2], RTS="fdh", add= TRUE, 
+                  lty=1, col="brown", lwd=2)
+# points(couple.o[,1],couple.o[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
+
+
+legend("topleft",legend=c( "FDH","order-m (Input)", "order-m (Output)"),lty=c(2,1,1),col=c(  "blue","purple", "brown"))
+@
+
+\clearpage
+\subsection{Graphical comparison $\alpha$-frontier for various $\alpha$s}
+
+<<fig=TRUE,echo=FALSE, label=FrontiersVary-A>>=
+annee <-annee1
+Workdata <-subset(Mydata, Test0 > 0)  
+dataref <- subset(Workdata,year==annee )
+
+# Plots 
+plot(dataref$K,dataref$Y,  pch="+", col="darkblue",
+      ylab="Y", xlab= "K",
+     main=paste(" Alpha Frontiers (input-oriented), various alphas in", annee),
+     sub=paste(nrow(dataref),"Airlines (various alpha, input oriented, M=",M.order,")" )
+)
+a=seq(from=0.90, to=1, by=0.025)
+colors <- rainbow(length(a)) 
+for (i in 1:length(a)) {
+#Alpha-Frontier INPUT
+alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="input",
+                 alpha=a[i], col=colors[i],
+                 lty=1, lwd=1, add=TRUE, confidence = F, shade=F)
+
+}
+
+#FDH
+dea.plot.frontier(dataref$K, dataref$Y, RTS="fdh", add= TRUE, 
+                  lty="dashed", col="blue", lwd=1)
+
+legend("topleft", legend=c(a), col=colors, title="Alpha")
+
+@
 
 \subsection{Statisitics for m and $\alpha$ -frontiers}
 
@@ -540,18 +626,27 @@ rug(dataref$K, col = "grey")
 <<echo=false,results=tex,label=CalculScores1>>=
 
 # Calcul des efficacitis avec DEA, m-frontieres et alpha-frontieres 
+Mystats.Prod <-  list( "mean", "min", "median",  "max", "n", 
+                "$\\bar{Nb}_{Eff}$" = function(x){return(length(which(x==1)))},
+                "$\\bar{Nb}_{Super}$" = function(x){return(length(which(x >1)))}, 
+                "$\\bar{X}_{not}$" = function(x){
+                  toto <-subset(x, x<1)
+                  return(mean(toto))}
+                  )
+
 #DEA ONE 1 INPUT  
-dataref1 <- subset(Workdata,year==annee )  # <- QUE 2002
+dataref1 <- subset(Workdata,year==annee )  # <- selct year
 nref.y1=nrow(dataref1)
 
 xref=matrix(c(dataref1$K),nrow=nref.y1,ncol=1)
 yref=matrix(c(dataref1$Y),nrow=nref.y1,ncol=1)
 
 spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="in")
-dataref1$DEA1 <-round(1/eff(spam), 3)
+#dataref1$DEA1 <-round(1/eff(spam), 3)   # When INPUT, Scores are <1, when OUTPT scores are >1  !!!
+dataref1$DEA1 <-round(eff(spam), 3)
 
 spam1 <- Benchmarking::dea(X=xref, Y=yref, RTS="fdh", ORIENTATION="in")
-dataref1$FDH1 <-round(1/eff(spam1), 3)
+dataref1$FDH1 <-round(eff(spam1), 3)  # idem here
 
 # M-frontier -  Scores input-oriented 
 
@@ -564,7 +659,8 @@ foo <- alphascore(xref, yref, xeval=xref, yeval=yref, alpha=alpha)
 dataref1$Ascore1 <-round(foo$input, 3)
 
 #Table
-Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", alpha,"(input oriented, K as unique input).")
+Mycap <- paste("Efficiency scores for",annee,", m=",M.order,", alpha = ", 
+               alpha,"(input oriented, K as unique input).")
 
 Mylab <- "Monlabel"
 Myvars<- with(dataref1, data.frame( "DEA (vrs)" = dataref1$DEA1,
@@ -573,7 +669,7 @@ Myvars<- with(dataref1, data.frame( "DEA (vrs)" = dataref1$DEA1,
                                       "alpha-Frontier" = dataref1$Ascore1
                                        )                                                                                                                          
                                       )
-tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+tableContinuous(vars = Myvars, stats = Mystats.Prod, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
 
 @
 
@@ -588,10 +684,10 @@ xref=matrix(c(dataref2$K),nrow=nref.y2,ncol=1)
 yref=matrix(c(dataref2$Y),nrow=nref.y2,ncol=1)
 
 spam <- Benchmarking::dea(X=xref, Y=yref, RTS="vrs", ORIENTATION="in")
-dataref2$DEA1 <-round(1/eff(spam), 3)
+dataref2$DEA1 <-round(eff(spam), 3)
 
 spam1 <- Benchmarking::dea(X=xref, Y=yref, RTS="fdh", ORIENTATION="in")
-dataref2$FDH1 <-round(1/eff(spam1), 3)
+dataref2$FDH1 <-round(eff(spam1), 3)
 
 # M-frontier 
 # Scores input-oriented 
@@ -611,7 +707,7 @@ Myvars<- with(dataref2, data.frame( "DEA (vrs)" = dataref2$DEA1,
                                       "alpha-Frontier" = dataref2$Ascore1
                                        )                                                                                                                          
                                       )
-tableContinuous(vars = Myvars, stats = Mystats, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
+tableContinuous(vars = Myvars, stats = Mystats.Prod, cap = Mycap, prec=2, lab = Mylab, longtable = FALSE)
 @
 
 %\newpage
@@ -634,7 +730,7 @@ print(foo2, include.colnames=TRUE )
 \clearpage
 %%%%%%% Annne 2
 
-<<echo =FALSE, results = tex>>=
+<<echo =FALSE, results = tex, label=TabScores2>>=
 # mise en forme du tableau pour Year 2
 
 spam <- cbind(dataref2$carrier, dataref2$carriername, dataref2$DEA, dataref2$FDH,  dataref2$Mscore, dataref2$Ascore)
@@ -655,6 +751,7 @@ print(foo2, include.colnames=TRUE)
 
 \clearpage
 
+%%%%%%%%%%%% STOP HERE !!!!!!!!
 
 \section{Dynamic Analysis}
 
@@ -705,12 +802,12 @@ for (i in 1:length(x)) {
 
 # recuperation du score DEA TOUTES  firmes sur frontiere contemporaine
     score.farell <- Benchmarking::dea(X=xref, Y=yref, XREF=xref, YREF=yref, RTS="vrs", ORIENTATION="in")
-    foo.c <-1/score.farell$eff
+    foo.c <-score.farell$eff  # inverser si Output  !!!!
     score.dea.cont <- c(score.dea.cont,foo.c)  
     
   # recuperation du score DEA TOUTES  firmes sur frontiere contemporaine
     score.farell2 <- Benchmarking::dea(X=xref, Y=yref, XREF=xref, YREF=yref, RTS="fdh", ORIENTATION="in")
-    foo2.c <-1/score.farell2$eff
+    foo2.c <-score.farell2$eff
     score.fdh.cont <- c(score.fdh.cont,foo2.c)  
     
 # recuperation du m score  TOUTES  firmes sur frontiere contemporaine 
@@ -876,13 +973,13 @@ for (i in 1:length(x)) {
     
 # recuperation du score DEA TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
     score.farell <- Benchmarking::dea(X=xobs, Y=yobs, XREF=xref, YREF=yref, RTS="vrs", ORIENTATION="in")
-    foo <-1/score.farell$eff
+    foo <-score.farell$eff  # inverser si output
     score.dea.all <- c(score.dea.all,foo)  
     
     
 # recuperation du score FDH  TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
     score.farell2 <- Benchmarking::dea(X=xobs, Y=yobs, XREF=xref, YREF=yref, RTS="fdh", ORIENTATION="in")
-    foo2 <-1/score.farell$eff
+    foo2 <-score.farell$eff  # idem !!!
     score.fdh.all <- c(score.fdh.all,foo2)  
     
 # recuperation du m score  TOUTES  firmes sur frontiere complete (avec toutes les firmes)  
@@ -1288,6 +1385,7 @@ We compare the ranking given by FDH estimator and those given by the $\alpha$-fr
 %Essais en tous genres...
 
 \section{Ranks over time}
+
 <<echo=FALSE, results=hide>>=
 # ESSAI de graphe des RANGS 
 
