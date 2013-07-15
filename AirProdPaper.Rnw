@@ -74,8 +74,8 @@ Mydata$Y <- Mydata$Yrevenue/1000
 Mydata$K <- Mydata$K/1000
 
 # New Definition 
-Mydata$Y <- log(Mydata$Y)
-Mydata$K <- log(Mydata$K)
+#Mydata$Y <- log(Mydata$Y)
+#Mydata$K <- log(Mydata$K)
          
 # New variables 
 Mydata$YoverK <- Mydata$Y/Mydata$K
@@ -156,10 +156,33 @@ print(foo)
 
 
 \subsection{Framework}
-We base our analysis on two type subsets of airlines: The whole sample and the sample reduced to majors airlines\footnote{Major airlines are defined as having an output greater than the third quartile of $Y$. See section \ref{Majors} }. We choose \Sexpr{annee1} and  \Sexpr{annee2} to be 2 years of reference in our analysis. These values are parameter of the program and may be changed anytime. We also spoted the LCC when possible. \\
+We base our analysis on two type subsets of airlines: The whole sample and the sample reduced to majors airlines\footnote{Major airlines are defined as having an output greater than the third quartile of $Y$. See section \ref{Majors} }. We choose \Sexpr{annee1} and  \Sexpr{annee2} to be 2 years of reference in our analysis. These values are parameter of the program and may be changed anytime. We also spotted the LCC when possible. \\
+
+\subsection{Input vs output-oriented framework ?}
+There is a serious issue there ! $\alpha$ and order-$m$ frontiers are different in output and input oriented framework. \\
+
+The output-oriented $\alpha$-frontier is by contruction ``declining'' as inputs become big (right side of the graph) simply because the density of firms with big inputs is small. In this area, firms with lower inputs mostly have also small outputs. The frontier si then progressively moving away from the FDH frontier as the level of inputs is increasing. Therefore, the most efficient firms will be \textbf{big firms} lying much above the output-oriented $\alpha$-frontier.\\
+
+On the contrary, the input-oriented $\alpha$-frontier is ``moving right'' for small values of input. In this area, firms with higher level of outputs  operate mostly with higher levels of inputs, leading to a frontier that is on the right of the FDH frontier. Therefore, most efficient firms will be those lying on the left of this frontier i.e. \textbf{small firms}...\\
+
+From an economic point of view, it seems reasonable to think that airlines are not able to select their output level but are rather adjusting their inputs to some expected (exogenous) level of output. This is in favor of an input-oriented framework. But this would select \textbf{small firms} as the most efficient using $\alpha$-frontiers ! \\
+
+To be discussed seriously. Should we move to hypebolic direction ?
 
 
 \subsection{Definition of variables}
+todo !
+\subsection{One versus 4 inputs}
+The fact is that using 4 inputs leads to some problems: first, we loose some firms (how much ?) since those 4 inputs are not always available in the dataset. Maybe we could use multiple imputation techniques to recover missing information, but the gains of such operation are quite questionnable. The resulting  observation should (at least in their reocntructed dimension) lie in the middle of the distribution and therefore have little impact on the frontiers. Second, working with less than 200 observation in a 5 dimensional space seems quite unreasonnable considering the sparcity of data in such a space. It seems however that $\alpha$-frontiers are doing quite a good job even in this very poor (in term of information) space. At least, $\alpha$-frontier do a better job that FDH and DEA where all the points in this 5 dimension space are found to be lying on the frontier. (see if we explain more). \\
+
+Choosing only one input $K$, instead of an index of input is also questionnable, but it allowed us to have more firms (information missing for some inputs, such as labor). This input is also the most important one in the management of airlines (is this true ???) and reflects the technology used by airlines (bof bof !!!)    
+
+
+
+
+\subsection{To log or not log ?}
+In a previous work, we used logs both for $K$ and $Y$ in order to have graphics that represent more gently the complete distribution of our firms. So, as expected, the distribution of firms was "less dense" and this has a direct impact on the $\alpha$-frontier which is sensitive to the density of the sample. The frontier changed, specially for small firms. The rank of the most efficient airlines (according to $\alpha$-scores) is a little bit changed even if the the top 10 remains the same. 
+
 
 \subsection{Descriptive statistics  for \Sexpr{annee1} and \Sexpr{annee2} }
  The number of complete observations is of \textbf{\Sexpr{nrow(unique(subset(Mydata, year == annee1, select= c(carrier))))}} carriers for \Sexpr{annee1} ( resp \textbf{\Sexpr{nrow(unique(subset(Mydata, year == annee2, select= c(carrier))))}}  for \Sexpr{annee2}). Below is a partial overview of the file's production variables for those \textbf{fully} observable airlines those 2 years.
@@ -757,7 +780,7 @@ print(foo2, include.colnames=TRUE)
 
 \subsection{Efficency over time}
 
-We propose to compute the efficiency (resp. m-efficiency and $\alpha$-efficiency) of arlines observed each year relative to the frontier (resp. m-frontier and $\alpha$-frontier) constructed over the pooled sample of airlines. This frontier may be viewed as the "industry" frontier constructed as the union of the yearly observed production sets and serves as a reference to see if firms distance to that frontier has changed over time. \\
+We propose to compute the efficiency (resp. m-efficiency and $\alpha$-efficiency) of arlines observed each year relative to the frontier (resp. m-frontier and $\alpha$-frontier) constructed over the pooled sample of airlines. This Meta-frontier may be viewed as the "industry" frontier constructed as the union of the yearly observed production sets and serves as a reference to see if firms distance to that frontier has changed over time. \\
 
 \textbf{Todo}
 \begin{itemize}
@@ -768,9 +791,9 @@ We propose to compute the efficiency (resp. m-efficiency and $\alpha$-efficiency
 
 \clearpage
 
-\subsection{Contemporaneous efficiencies (1 or 4 inputs !)}
-% IL Y a 3 changements ` faire : 1 ici et 2 pour la Pooled frontiere (1 pour xref, 1 pour xobs)
-<<echo=FALSE, results=hide>>=
+\subsection{Contemporaneous efficiencies (1 input !)}
+% IL Y a 3 changements ` faire : 1 ici et 2 pour la Meta frontiere (1 pour xref, 1 pour xobs)
+<<echo=FALSE, results=hide, label=Contemporaneous>>=
 ## Scores par an sur  frontieres contemporaines     
 Workdata <-subset(Mydata, Test0 > 0)
 attach(Workdata)
@@ -841,7 +864,7 @@ colors <- rainbow(length(unique(Workdata$year)))
 
 %%%% DEA 
 
-<<echo=FALSE, results=hide, fig=TRUE>>=
+<<echo=FALSE, results=hide, fig=TRUE,label=ContDEA>>=
 boxplot(score.dea.cont[,2]~score.dea.cont[,1], 
         main = "Airlines efficiency on contemporaneous DEA-frontier", 
         col=colors, 
@@ -863,7 +886,7 @@ abline(h = 1, col = "red",  lwd=2)
 
 %%%% FDH
 
-<<echo=FALSE, results=hide, fig=TRUE>>=
+<<echo=FALSE, results=hide, fig=TRUE, label=ContDEA>>=
 boxplot(score.fdh.cont[,2]~score.fdh.cont[,1], 
         main = "Airlines efficiency on contemporaneous FDH-frontier", 
         col=colors, 
@@ -873,19 +896,11 @@ boxplot(score.fdh.cont[,2]~score.fdh.cont[,1],
 abline(h = 1, col = "red",  lwd=2)
 @
 
-% << echo=FALSE, results=hide, fig=TRUE>>=
-% p <- qplot(y.c, score.fdh.cont, data=score.fdh.cont, geom=c("boxplot"), 
-%       fill=y.c, main="Airlines efficiency measured relative to contemporaneous FDH-frontier",
-%       ylab = "FDH-Efficiency (output oriented)", 
-%       xlab = "Years ", outline =FALSE)
-% p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
-% p
-% 
-% @
+
 
 %%%% M-order
 
-<<echo=FALSE, results=hide, fig=TRUE>>=
+<<echo=FALSE, results=hide, fig=TRUE, label=ContM>>=
 boxplot(score.m.cont[,2]~score.m.cont[,1], 
         main = "Airlines efficiency on contemporaneous order-m frontier", 
         col=colors, 
@@ -894,19 +909,10 @@ boxplot(score.m.cont[,2]~score.m.cont[,1],
 abline(h = 1, col = "red",  lwd=2)
 @
 
-% << echo=FALSE, results=hide, fig=TRUE>>=
-% p<-qplot(y.c, score.m.cont, data=score.m.cont, geom=c("boxplot"), 
-%       fill=y.c, main="Airlines efficiency measured relative to contemporaneous order-m frontier",
-%       ylab = "order-m Efficiency (output oriented)", 
-%       xlab = "Years ", outline =FALSE)
-% p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
-% p
-% 
-% @
 
 %%%% Alpha
 
-<<echo=FALSE, results=hide, fig=TRUE>>=
+<<echo=FALSE, results=hide, fig=TRUE, label=ContA>>=
 boxplot(score.alpha.cont[,2]~score.alpha.cont[,1], 
         main = "Airlines efficiency on contemporaneous alpha frontier", 
         col=colors, 
@@ -916,21 +922,12 @@ boxplot(score.alpha.cont[,2]~score.alpha.cont[,1],
 abline(h = 1, col = "red",  lwd=2)
 @
 
-% << echo=FALSE, results=hide, fig=TRUE>>=
-% p <- qplot(y.c, score.alpha.cont, data=score.alpha.cont, geom=c("boxplot"), 
-%       fill=y.c, main="Airlines efficiency measured relative to contemporaneous alpha frontier",
-%       ylab = "alpha Efficiency (output oriented)", 
-%       xlab = "Years ", outline =FALSE)
-% 
-% p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
-% p
-% @
 
 \clearpage
 
-\subsection{Efficiencies computed relative to POOLED frontier} 
+\subsection{Efficiencies computed relative to META-frontier} 
 
-<<echo=FALSE, results=hide>>=
+<<echo=FALSE, results=hide, label=Meta>>=
 ## Scores par an sur  LA frontiere all years (pool)     
 Workdata <-subset(Mydata, Test0 > 0)
 attach(Workdata)
@@ -1012,10 +1009,10 @@ score.alpha$y <- as.factor(score.alpha$y)
 
 % Graphs (Boxplots)  
 %%%%%%%      DEA
-<<echo=FALSE, results=hide, fig=TRUE>>=
+<<echo=FALSE, results=hide, fig=TRUE, label=MetaDEA>>=
 
 boxplot(score.dea[,2]~score.dea[,1], 
-        main = "Airlines efficiency on DEA- frontier (Pooled Set)", 
+        main = "Airlines efficiency on DEA- frontier (Meta Set)", 
         col=colors, 
         sub = paste(" DEA frontier computed using ", nref, 
                     "airlines  and",Ninput,"inputs"),  
@@ -1028,7 +1025,7 @@ abline(h = 1, col = "red",  lwd=2)
 % 
 % << echo=FALSE, results=hide, fig=TRUE>>=
 % p <- qplot(y, score.dea.all, data=score.dea, geom=c("boxplot"), 
-%       fill=y, main="Airlines efficiency measured relative to pooled DEA- frontier",
+%       fill=y, main="Airlines efficiency measured relative to Meta DEA- frontier",
 %       ylab = "DEA-Efficiency (output oriented)", 
 %       xlab = "Years ", outline =FALSE)
 % p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
@@ -1039,10 +1036,10 @@ abline(h = 1, col = "red",  lwd=2)
 %%%% FDH
 
 
-<< echo=FALSE, results=hide, fig=TRUE>>=
+<< echo=FALSE, results=hide, fig=TRUE, label=MetaFDH>>=
 boxplot(score.fdh[,2]~score.fdh[,1], 
         col=colors, 
-        main = "Airlines efficiency  on FDH frontier (Pooled Set)", 
+        main = "Airlines efficiency  on FDH frontier (Meta Set)", 
          sub = paste(" FDH frontier computed using ", nref, 
                     "airlines and",Ninput,"inputs"),  
         ylab = "Efficiency (input oriented)", 
@@ -1053,7 +1050,7 @@ abline(h = 1, col = "red",  lwd=2)
 % 
 % << echo=FALSE, results=hide, fig=TRUE>>=
 % p <- qplot(y, score.fdh.all, data=score.dea, geom=c("boxplot"), 
-%       fill=y, main="Airlines efficiency measured relative to pooled FDH- frontier",
+%       fill=y, main="Airlines efficiency measured relative to Meta FDH- frontier",
 %       ylab = "DEA-Efficiency (output oriented)", 
 %       xlab = "Years ", outline =FALSE)
 % p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
@@ -1064,10 +1061,10 @@ abline(h = 1, col = "red",  lwd=2)
 
 %%%%% M-order 
 
-<< echo=FALSE, results=hide, fig=TRUE>>=
+<< echo=FALSE, results=hide, fig=TRUE, label=MetaM>>=
 
 boxplot(score.m[,2]~score.m[,1], 
-        main = "Airlines efficiency on order-m frontier (Pooled Set)", 
+        main = "Airlines efficiency on order-m frontier (Meta Set)", 
         col=colors, 
         sub = paste(" m-frontier computed on ", nref, 
                     "airlines on",Ninput,"inputs, m=", M.order,"."),  
@@ -1080,7 +1077,7 @@ abline(h = 1, col = "red",  lwd=2)
 % 
 % << echo=FALSE, results=hide, fig=TRUE>>=
 % p <- qplot(y, score.m.all, data=score.dea, geom=c("boxplot"), 
-%       fill=y, main="Airlines efficiency measured relative to pooled order-m frontier",
+%       fill=y, main="Airlines efficiency measured relative to Meta order-m frontier",
 %       ylab = "order-m Efficiency (output oriented)", 
 %       xlab = "Years ", outline =FALSE)
 % p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
@@ -1089,10 +1086,10 @@ abline(h = 1, col = "red",  lwd=2)
 
 
 %%% ALPHA 
-<<echo=FALSE, results=hide, fig=TRUE>>=
+<<echo=FALSE, results=hide, fig=TRUE, label=MetaA>>=
 
 boxplot(score.alpha[,2]~score.alpha[,1], 
-        main = "Airlines efficiency on alpha-frontier (Pooled Set)", 
+        main = "Airlines efficiency on alpha-frontier (Meta Set)", 
         col=colors, 
         sub = paste(" alpha-frontier computed on ", nref,
                     "airlines on",Ninput,"inputs, alpha=", alpha,"."),  
@@ -1104,7 +1101,7 @@ abline(h = 1, col = "red",  lwd=2)
 % 
 % << echo=FALSE, results=hide, fig=TRUE>>=
 % p <- qplot(y, score.alpha.all, data=score.dea, geom=c("boxplot"), 
-%       fill=y, main="Airlines efficiency measured relative to pooled alpha-frontier",
+%       fill=y, main="Airlines efficiency measured relative to Meta alpha-frontier",
 %       ylab = "alpha  Efficiency (output oriented)", 
 %       xlab = "Years ", outline =FALSE)
 % p <- p + geom_hline(yintercept=1, colour="red", size=1.2)
@@ -1116,14 +1113,14 @@ abline(h = 1, col = "red",  lwd=2)
 
 Other representations : 
 
-<<echo=FALSE, results=hide, fig=TRUE>>=
+<<echo=FALSE, results=hide, fig=TRUE, label=QQDensity>>=
 # Kernel density plots for Efficiency
 # grouped by number of year (indicated by color) : fill = y pour les annC)es
 
 qplot(score.dea.all ,data=score.dea, geom="density", 
       fill=y, alpha=I(.5), 
       main="Distribution of efficiencies over time", 
-      xlab="DEA-score efficiency relative to pooled frontier ", 
+      xlab="DEA-score efficiency relative to Meta frontier ", 
        ylab="Density")
 
 @
@@ -1133,7 +1130,7 @@ qplot(score.dea.all ,data=score.dea, geom="density",
 qplot(score.alpha.all ,data=score.alpha, geom="density", 
       fill=y,   alpha=I(.5),     
       main="Distribution of efficiencies over time", 
-      xlab="Alpha-score efficiency  relative to pooled frontier ",
+      xlab="Alpha-score efficiency  relative to Meta frontier ",
       ylab="Density")
 
 @
@@ -1165,7 +1162,7 @@ Malmquist decomposition proposed by Simar \& Wilson (1998) \&  Wheelock \& Wilso
 where $D^{CRS}_t(x,y)$ incorporates  the assumption of \textit{Constant} Return to Scale (CRS), while $D^{VRS}_t(x,y)$ incorporates  the assumption of \textit{Variable} Return to Scale (VRS).\\
 
 % 
-% <<echo=FALSE, results=hide>>=
+% <<echo=FALSE, results=hide, label=Malm>>=
 % # definiton of elements 
 % i1=seq(2002, 2007, by=1)  # An 1
 % i2=seq(2003,2008, by=1)   # An 2
@@ -1386,7 +1383,7 @@ We compare the ranking given by FDH estimator and those given by the $\alpha$-fr
 
 \section{Ranks over time}
 
-<<echo=FALSE, results=hide>>=
+<<echo=FALSE, results=hide, label=GraphRanks>>=
 # ESSAI de graphe des RANGS 
 
 x=seq(2002, 2008, by=1)  
