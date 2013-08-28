@@ -1,6 +1,8 @@
 % Sweave file creatfrom AirlineDataExploration.Rnw
 % Created (CB) 11/07/2013 
 % 11/07/2013 : Only one input, variablesin log
+% 19/08/2013 : Hyperbolic direction  
+% 26/08/2013 : distinction small/big firms...
 
 \documentclass[a4paper]{article}
 
@@ -22,7 +24,7 @@ Non log and hyperbolic orientation}
 
 % Et pour laisser l affichage des commentaires du programmes
 \SweaveOpts{keep.source=TRUE}
-
+ 
 
 <<echo=FALSE, results=hide, label=data>>=
 
@@ -436,7 +438,7 @@ alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="hyper",alpha=al
                  col='green',lty=1,lwd=2, add=TRUE, confidence = F, shade=F)
 
 
-#Order-m frontier ( On "lisse" avec le FDH des points générés sur la m-frontière)
+#Order-m frontier ( On "lisse" avec le FDH des points g?n?r?s sur la m-fronti?re)
 dea.plot.frontier(couple.h[,1],couple.h[,2], RTS="fdh", add= TRUE, 
                   lty=1, col="purple", lwd=2)
 # points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
@@ -468,7 +470,7 @@ alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="hyper",alpha=al
                  col='green',lty=1,lwd=2, add=TRUE, confidence = F, shade=F)
 
 
-#Order-m frontier ( On "lisse" avec le FDH des points générés sur la m-frontière)
+#Order-m frontier ( On "lisse" avec le FDH des points g?n?r?s sur la m-fronti?re)
 dea.plot.frontier(couple.h[,1],couple.h[,2], RTS="fdh", add= TRUE, 
                   lty=1, col="purple", lwd=2)
 # points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
@@ -527,7 +529,7 @@ alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="hyper",alpha=al
                  col='green',lty=1,lwd=2, add=TRUE, confidence = F, shade=F)
 
 
-#Order-m frontier ( On "lisse" avec le FDH des points générés sur la m-frontière)
+#Order-m frontier ( On "lisse" avec le FDH des points g?n?r?s sur la m-fronti?re)
 dea.plot.frontier(couple.h[,1],couple.h[,2], RTS="fdh", add= TRUE, 
                   lty=1, col="purple", lwd=2)
 # points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
@@ -557,7 +559,7 @@ alphafrontier.2d(as.matrix(dataref$K),as.matrix(dataref$Y),type="hyper",alpha=al
                  col='green',lty=1,lwd=2, add=TRUE, confidence = F, shade=F)
 
 
-#Order-m frontier ( On "lisse" avec le FDH des points générés sur la m-frontière)
+#Order-m frontier ( On "lisse" avec le FDH des points g?n?r?s sur la m-fronti?re)
 dea.plot.frontier(couple.h[,1],couple.h[,2], RTS="fdh", add= TRUE, 
                   lty=1, col="purple", lwd=2)
 # points(couple.i[,1],couple.i[,2], type="l", xlab="Xvol",  col="purple", pch="*", lty=2)
@@ -580,7 +582,7 @@ dataref <- subset(Workdata,year==annee )
 
 # Plots 
 plot(dataref$K,dataref$Y,  pch="+", col="darkgrey",
-       xlim=c(0,bornex),ylim=c(0,borney),
+       #xlim=c(0,bornex),ylim=c(0,borney),
       ylab="Y", xlab= "K",
      main=paste(" Alpha Frontiers (all-orientations) in", annee),
      sub=paste(nrow(dataref),"Airlines (alpha=",alpha,")" ) )
@@ -695,7 +697,7 @@ Mystats.Prod <-  list( "mean", "min", "median",  "max", "n",
                   )
 
 #DEA ONE 1 INPUT  
-dataref1 <- subset(Workdata,year==annee )  # <- selct year
+dataref1 <- subset(Workdata,year==annee )  # <- select year
 nref.y1=nrow(dataref1)
 
 xref=matrix(c(dataref1$K),nrow=nref.y1,ncol=1)
@@ -775,39 +777,124 @@ tableContinuous(vars = Myvars, stats = Mystats.Prod, cap = Mycap, prec=2, lab = 
 
 %\newpage
 %\clearpage
-\subsection{Detailled airlines efficiency scores}
-<<echo =FALSE, results = tex, label=TabScores1>>=
-# mise en forme du tableau ONE INPUT 
+\section{Detailled airlines efficiency scores}
 
+\subsection{\textbf{Big} airlines efficiency ranking, year \Sexpr{annee1}}
+
+<<echo =FALSE, results = hide,  label=ThresholdBig1>>=
+# definition of BIG  
+threshold <- .50
+biglimit <- quantile(dataref1$Y,probs=threshold)
+
+nlist <- 20  # length of the table...
+# mise en forme du tableau ONE INPUT 
 spam <- data.frame(dataref1$carrier, dataref1$carriername, dataref1$DEA1,
-              dataref1$FDH1, dataref1$Mscore1, dataref1$Ascore1)
+              dataref1$FDH1, dataref1$Mscore1, dataref1$Ascore1, dataref1$Y)
+
+@
+We define Big airlines as those being above the quantile \Sexpr{threshold} for the output variable $Y$. Here, for year \Sexpr{annee1} the lower bound of $Y$ is then \Sexpr{round(biglimit, 2)}.
+
+<<echo =FALSE, results = tex, label=TabScoresBestBigYear1>>=
+spam.big <- subset(spam, dataref1$Y > biglimit )
+
+spam.big <- spam.big[order(spam.big[, 6], decreasing =TRUE), ]
+
+foo1.big <- xtable(spam.big[1:nlist,1:7], digits=2, label ="Eff", 
+                   caption = paste("",nlist,"BEST BIG airlines efficiency (sorted by alpha-scores),
+                                   year",annee1, ", m=",M.order,", alpha = ", alpha,
+                                   "(hyper oriented, 1 input),"
+                                   ,nrow(dataref1),"airlines. "))
+
+names(foo1.big) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score", "Y")
+print(foo1.big, include.colnames=TRUE, include.rownames=FALSE  )
+@
+
+
+<<echo =FALSE, results = tex, label=TabScoresWorseBigYear1>>=
+
+spam.big.W <- spam.big[order(spam.big[, 6], decreasing =FALSE), ] # <<<-----  Sort   !
+
+foo1.big.W <- xtable(spam.big.W[1:nlist,1:7], digits=2, label ="Eff", 
+                   caption = paste("",nlist,"WORSE BIG airlines efficiency (sorted by alpha-scores),
+                                   year",annee1, ", m=",M.order,", alpha = ", alpha,
+                                   "(hyper oriented, 1 input),"
+                                   ,nrow(dataref1),"airlines. "))
+
+names(foo1.big.W) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score", "Y")
+print(foo1.big.W, include.colnames=TRUE, include.rownames=FALSE  )
+@
+
+\clearpage
+
+\subsection{\textbf{Small} airlines efficiency ranking, year \Sexpr{annee1}}
+
+
+We define \textbf{small} airlines as those being below the quantile \Sexpr{threshold} for the output variable $Y$. Here, for year \Sexpr{annee1} the lower bound of $Y$ is then \Sexpr{round(biglimit, 2)}.
+
+<<echo =FALSE, results = tex, label=TabScoresBestSmallYear1>>=
+spam.small <- subset(spam, dataref1$Y < biglimit )
+
+spam.small <- spam.small[order(spam.small[, 6], decreasing =TRUE), ]
+
+foo1.small <- xtable(spam.small[1:nlist,1:7], digits=2, label ="Eff", 
+                   caption = paste("",nlist,"BEST SMALL airlines efficiency (sorted by alpha-scores),
+                                   year",annee1, ", m=",M.order,", alpha = ", alpha,
+                                   "(hyper oriented, 1 input),"
+                                   ,nrow(dataref1),"airlines. "))
+
+names(foo1.small) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score", "Y")
+print(foo1.small, include.colnames=TRUE, include.rownames=FALSE  )
+@
+
+
+<<echo =FALSE, results = tex, label=TabScoresWorseSmallYear1>>=
+
+spam.small.W <- spam.small[order(spam.small[, 6], decreasing =FALSE), ] # <<<-----  Sort   !
+
+foo1.small.W <- xtable(spam.small.W[1:nlist,1:7], digits=2, label ="Eff", 
+                   caption = paste("",nlist,"WORSE SMALL airlines efficiency (sorted by alpha-scores),
+                                   year",annee1, ", m=",M.order,", alpha = ", alpha,
+                                   "(hyper oriented, 1 input),"
+                                   ,nrow(dataref1),"airlines. "))
+
+names(foo1.small.W) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score", "Y")
+print(foo1.small.W, include.colnames=TRUE, include.rownames=FALSE  )
+@
+
+
+\clearpage
+
+\subsection{\textbf{All} airlines efficiency ranking, year \Sexpr{annee1}}
+
+<<echo =FALSE, results = tex, label=TabScores1>>=
 
 spam <- spam[order(spam[, 6], decreasing =TRUE), ]
 
-foo2 <- xtable(spam[1:50,], digits=2, label ="Eff", caption = paste("50 first airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(hyper oriented, 1 input), ",nrow(dataref1),"airlines (sorted by alpha-scores)."))
+foo2 <- xtable(spam[1:nlist,1:7], digits=2, label ="Eff", caption = paste("",nlist,"first airlines efficiency, year",annee1,", m=",M.order,", alpha = ", alpha,"(hyper oriented, 1 input), ",nrow(dataref1),"airlines (sorted by alpha-scores)."))
 
-names(foo2) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score")
+names(foo2) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score", "Y")
 print(foo2, include.colnames=TRUE, include.rownames=FALSE  )
 @
 
 \clearpage
+\subsection{\textbf{All} airlines efficiency ranking, year \Sexpr{annee2}}
+
 %%%%%%% Annne 2
 
 <<echo =FALSE, results = tex, label=TabScores2>>=
 # mise en forme du tableau pour Year 2
 
-spam <- data.frame(dataref2$carrier, dataref2$carriername, dataref2$DEA, dataref2$FDH,  dataref2$Mscore, dataref2$Ascore)
+spam <- data.frame(dataref2$carrier, dataref2$carriername, dataref2$DEA, 
+                   dataref2$FDH,  dataref2$Mscore, dataref2$Ascore,dataref2$Y )
 
 spam <- spam[order(spam[, 6], decreasing =TRUE), ]
-#spam <- spam[order(   - dataref2$Mscore  - dataref2$Ascore - dataref2$DEA),]
 
-
-foo2 <- xtable(spam[1:50,], digits=2, label ="Eff", 
-               caption = paste("50 first airlines efficiency, year",annee2,", 
+foo2 <- xtable(spam[1:nlist,1:7], digits=2, label ="Eff", 
+               caption = paste("", nlist,"first airlines efficiency, year",annee2,", 
                             m=",M.order,", alpha = ", alpha,"(hyper oriented, 1 input), 
                                ",nrow(dataref2),"airlines, (sorted by alpha-scores)."))
 
-names(foo2) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score")
+names(foo2) <- c("code", "Airline", "DEA", "FDH", "M-Score", "alpha-Score", "Y")
 print(foo2, include.colnames=TRUE, include.rownames=FALSE )
 @
 
